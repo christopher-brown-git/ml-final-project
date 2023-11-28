@@ -16,20 +16,24 @@ def load_data():
         elif name.is_file and name.path.split('/')[1] == 'CardMasterListSeason18_12082020.csv':
             card_list_path = name.path
 
-    #read in dataframe
-    df = pd.read_csv(paths_to_files[0])
 
-    card_list_file = open(card_list_path, 'r')
+    #create empty dataframe
+    df_small = pd.DataFrame()
 
     #dictionary mapping from card codes to card names
     card_dict = {}
 
-    #set of columns not to drop
-    keep_cols = set()
+    #open csv containing the mapping between card codes and card names
+    card_list_file = open(card_list_path, 'r')
 
-    #create dummy variables
+    #add new columns to new dataframe for the categorical variables indicating whether or not
+    #the winners and losers' decks contain certain cards AND create dict mapping card codes to card names
     index_w = 0
-    for line in card_list_file:
+    for num, line in enumerate(card_list_file):
+        #skip first line of file
+        if num == 0:
+            continue
+
         arr = line.split(',')
         card_code = arr[0]
         card_name = arr[1].split('\n')[0]
@@ -39,45 +43,35 @@ def load_data():
 
         #create dummy variable for if the winner had a certain card
         #and for if the loser had a certain card
-        df.insert(index_w, card_col_w, '')
-        df.insert(index_w*2 + 1, card_col_l, '')
+        df_small.insert(index_w, card_col_w, '')
+        df_small.insert(index_w*2 + 1, card_col_l, '')
 
-        keep_cols.add(card_col_w)
-        keep_cols.add(card_col_l)
-        
         index_w += 1
-
+        
         card_dict[card_code] = card_name
-
-    #create outcome column, it will always be ones because the winning deck
-    #is the deck with lower column indices
-
-    df['Y'] = 1
-    keep_cols.add('Y')
 
     card_list_file.close()
 
-    # print(keep_cols)
+    #create outcome column, it will always be ones because the winning deck
+    #is the deck with lower column indices
+    df_small.insert(0, 'Y', 1)
 
-    #remove unnecessary columns
-    drop_cols = []
-    for col in df.columns:
-        if col not in keep_cols:
-            drop_cols.append(col)
-    
-    #print(drop_cols)
-    df = df.drop(columns=drop_cols)
+    #read in dataframe
+    df = pd.read_csv(paths_to_files[0])
 
 
-    # file_objects = []
-    
-    # print("test1")
-    # data = pd.get_dummies(data)
-    # print("test2")
-    
-    #print("00000000000000000000000000000")
+    cols_to_transfer = ["winner.card1.id", "winner.card2.id",
+                        "winner.card3.id", 	"winner.card4.id",
+                        "winner.card5.id",	"winner.card6.id",
+                        "winner.card7.id",	"winner.card8.id", 
+                        "loser.card1.id", "loser.card2.id",
+                        "loser.card3.id", 	"loser.card4.id",
+                        "loser.card5.id",	"loser.card6.id",
+                        "loser.card7.id",	"loser.card8.id",]
 
-    for col in df.columns:
-        print(col)
+    #assign categorical variables in df_small based on values in df
+    for index, row in df.iterrows():
+        for col in df_small.col
+
 
 load_data()
