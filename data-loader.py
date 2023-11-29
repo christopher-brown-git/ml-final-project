@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import tqdm
 
 def load_data():
     paths_to_files = []
@@ -16,9 +17,11 @@ def load_data():
         elif name.is_file and name.path.split('/')[1] == 'CardMasterListSeason18_12082020.csv':
             card_list_path = name.path
 
+    #NEW APPROACH
+    #drop unneccessary columns
+    #create list of dictionaries and then create new dataframe from this 
+    #save resulting dataframe into a csv file
 
-    #create empty dataframe
-    df_small = pd.DataFrame()
 
     #dictionary mapping from card codes to card names
     card_dict = {}
@@ -26,9 +29,7 @@ def load_data():
     #open csv containing the mapping between card codes and card names
     card_list_file = open(card_list_path, 'r')
 
-    #add new columns to new dataframe for the categorical variables indicating whether or not
-    #the winners and losers' decks contain certain cards AND create dict mapping card codes to card names
-    index_w = 0
+    #create mapping from card codes to card names
     for num, line in enumerate(card_list_file):
         #skip first line of file
         if num == 0:
@@ -37,51 +38,87 @@ def load_data():
         arr = line.split(',')
         card_code = arr[0]
         card_name = arr[1].split('\n')[0]
-
-        card_col_w = card_name + '_w'
-        card_col_l = card_name + '_l'
-
-        #create dummy variable for if the winner had a certain card
-        #and for if the loser had a certain card
-        df_small.insert(index_w, card_col_w, 0)
-        df_small.insert(index_w*2 + 1, card_col_l, 0)
-
-        index_w += 1
         
         card_dict[card_code] = card_name
 
     card_list_file.close()
 
-    #create outcome column, it will always be ones because the winning deck
-    #is the deck with lower column indices
-    df_small.insert(0, 'Y', 1)
-
     #read in dataframe
     df = pd.read_csv(paths_to_files[0])
 
 
-    cols_to_transfer = ["winner.card1.id", "winner.card2.id",
+    cols_to_keep = {"winner.card1.id", "winner.card2.id",
                         "winner.card3.id", 	"winner.card4.id",
                         "winner.card5.id",	"winner.card6.id",
                         "winner.card7.id",	"winner.card8.id", 
                         "loser.card1.id", "loser.card2.id",
                         "loser.card3.id", 	"loser.card4.id",
                         "loser.card5.id",	"loser.card6.id",
-                        "loser.card7.id",	"loser.card8.id",]
+                        "loser.card7.id",	"loser.card8.id"}
+
+    cols_to_drop = []
+    for col in df.columns:
+        if col not in cols_to_keep:
+            cols_to_drop.append(col)
+    
+    df = df.drop(cols_to_drop, axis=1)
+
+    new_rows = []
+
+    for index, row in tqdm.tqdm(df.iterrows(), total=df.shape[0]):
+        new_row = {}    
+        cards_in_row = set()
+        for col in cols_to_keep:
+            card_code = str(row[col])
+
+            player = col.split('.')[0][0]
+
+            if player == "w":
+                cards_in_row.add(card_dict[card_code] + '_w')
+            else:
+                cards_in_row.add(card_dict[card_code] + '_l')
+            
+        for card in card_dict.values():
+            card_w = card + '_w'
+            if card_w in cards_in_row:
+                new_row[card_w] = 1
+            else:
+                new_row[card_w] = 0
+        
+        for card in card_dict.values():
+            card_w = card + '_l'
+            if card_w in cards_in_row:
+                new_row[card_w] = 1
+            else:
+                new_row[card_w] = 0
+        
+        new_rows.append(new_row)
+
+        #should be plenty of rows
+        if index > 1500000:
+            break
+    
+    df_small = pd.DataFrame(new_rows)
+        
+    df_small.to_csv("df_small.csv")
+            
+
+
 
     #assign categorical variables in df_small based on values in df
-    for index, row in df.iterrows():
-        for col in cols_to_transfer:
-            tag = col.split('.')[0][0]
-            card_code = str(row[col])
-            col_small = ''
+    # for index, row in df.iterrows():
+    #     for col in cols_to_transfer:
+    #         tag = col.split('.')[0][0]
+    #         card_code = str(row[col])
+    #         col_small = ''
 
-            if tag == 'w':
-                col_small = card_dict[card_code] + '_w'
-            else:
-                col_small = card_dict[card_code] + '_l'
-                        
-            df_small[index][col_small] = 1
+    #         if tag == 'w':
+    #             col_small = card_dict[card_code] + '_w'
+    #         else:
+    #             col_small = card_dict[card_code] + '_l'
+
+    #         print(row, col_small)            
+    #         df_small[index][col_small] = 1
 
 
 load_data()
