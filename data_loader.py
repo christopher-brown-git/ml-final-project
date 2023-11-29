@@ -103,24 +103,6 @@ def load_data():
     df_small = pd.DataFrame(new_rows)
         
     df_small.to_csv("df_small_1.csv")
-            
-
-
-
-    #assign categorical variables in df_small based on values in df
-    # for index, row in df.iterrows():
-    #     for col in cols_to_transfer:
-    #         tag = col.split('.')[0][0]
-    #         card_code = str(row[col])
-    #         col_small = ''
-
-    #         if tag == 'w':
-    #             col_small = card_dict[card_code] + '_w'
-    #         else:
-    #             col_small = card_dict[card_code] + '_l'
-
-    #         print(row, col_small)            
-    #         df_small[index][col_small] = 1
 
 
 load_data()
