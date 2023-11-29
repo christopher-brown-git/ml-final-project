@@ -43,8 +43,8 @@ def load_data():
 
         #create dummy variable for if the winner had a certain card
         #and for if the loser had a certain card
-        df_small.insert(index_w, card_col_w, '')
-        df_small.insert(index_w*2 + 1, card_col_l, '')
+        df_small.insert(index_w, card_col_w, 0)
+        df_small.insert(index_w*2 + 1, card_col_l, 0)
 
         index_w += 1
         
@@ -71,7 +71,17 @@ def load_data():
 
     #assign categorical variables in df_small based on values in df
     for index, row in df.iterrows():
-        for col in df_small.col
+        for col in cols_to_transfer:
+            tag = col.split('.')[0][0]
+            card_code = str(row[col])
+            col_small = ''
+
+            if tag == 'w':
+                col_small = card_dict[card_code] + '_w'
+            else:
+                col_small = card_dict[card_code] + '_l'
+                        
+            df_small[index][col_small] = 1
 
 
 load_data()
