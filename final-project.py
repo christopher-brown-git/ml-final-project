@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import os
-from data_loader import load_data
+import tqdm
+from data_loader import create_data, load_data
 
 def mean_negative_loglikelihood(Y, pYhat):
     """
@@ -50,7 +51,7 @@ class LogisticRegression:
         num_rows, num_cols = Xmat.shape
 
         #create gradient vector
-        grad_vec = np.zeros(d)
+        grad_vec = np.zeros(num_cols)
 
         for i in range(0, len(grad_vec)):
             nudge = [0]*len(grad_vec)
@@ -65,6 +66,8 @@ class LogisticRegression:
 
                 grad_vec[i] = ((l2_reg_no_nudge + mean_negative_loglikelihood(Y, sigmoid(Xmat @ (theta_p + nudge)))) 
                                 - (l2_reg_nudge + mean_negative_loglikelihood(Y, sigmoid(Xmat @ theta_p))))/tiny
+
+        return grad_vec
     
     def fit(self, Xmat, Y, max_iterations=1000, tolerance=1e-6, verbose=False):
         """
@@ -74,12 +77,11 @@ class LogisticRegression:
         num_rows, num_cols = Xmat.shape
 
         #initialilze theta and theta_new randomly
-        theta = np.random.uniform(-1, 1, d)
-        theta_new = np.random.uniform(-1, 1, d)
+        theta = np.random.uniform(-1, 1, num_cols)
+        theta_new = np.random.uniform(-1, 1, num_cols)
 
         #do gradient descent until convergence
-        iteration = 0
-        while iteration < max_iterations: 
+        for iteration in tqdm.tqdm(range(0, max_iterations), total=max_iterations):
             if verbose:
                 print("Iteration", iteration, "theta=", theta)
 
@@ -89,8 +91,8 @@ class LogisticRegression:
                 break
             theta = theta_new
 
-            iteration += 1
-        
+            #iteration += 1
+                
         self.theta = theta_new.copy()
 
     def predict(self, Xmat):
@@ -118,11 +120,39 @@ def main():
     #check file exists
     path = "df_small_1.csv"
     if not os.path.isfile(path):
-        load_data()
+        create_data()
     
-    df = pd.read_csv(path)
-    
-    
+    feature_names, data = load_data()
+
+    model_basic = LogisticRegression(learning_rate=0.2, lamda=0.0)
+    model_basic.fit(data["Xmat_train"], data["Y_train"])
+
+    model_lowl2 = LogisticRegression(learning_rate=0.2, lamda=0.0)
+    model_lowl2.fit(data["Xmat_train"], data["Y_train"])
+
+    model_highl2 = LogisticRegression(learning_rate=0.2, lamda=0.0)
+    model_highl2.fit(data["Xmat_train"], data["Y_train"])
+
+
+    Yhat_val_basic = model_basic.predict(data["Xmat_val"])
+    Yhat_val_lowl2 = model_lowl2.predict(data["Xmat_val"])
+    Yhat_val_highl2 = model_highl2.predict(data["Xmat_val"])
+
+    accuracy_basic = accuracy(data["Y_val"], Yhat_val_basic)
+    accuracy_lowl2 = accuracy(data["Y_val"], Yhat_val_lowl2)
+    accuracy_highl2 = accuracy(data["Y_val"], Yhat_val_highl2)
+
+    print("\nClash Royale data results:\n" + "-"*4)
+    print("Validation accuracy no regularization", accuracy_basic)
+    print("Validation accuracy lamda=0.01", accuracy_lowl2)
+    print("Validation accuracy lamda=0.2", accuracy_highl2)
+
+
+    # choose the best model
+    # best_model = model_lowl2 # EDIT ME
+    # Yhat_test = best_model.predict(data["Xmat_test"])
+    # print("Test accuracy", accuracy(data["Y_test"], Yhat_test))
+    # print("Clash Royale data weights", {feature_names[i]: round(best_model.theta[i], 2) for i in range(len(feature_names))})
     
 
 if __name__ == "__main__":
