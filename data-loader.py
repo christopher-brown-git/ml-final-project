@@ -97,7 +97,7 @@ def load_data():
         new_rows.append(new_row_w)
 
         #should be plenty of rows
-        if index > 1250000:
+        if index > 1500000:
             break
     
     df_small = pd.DataFrame(new_rows)
