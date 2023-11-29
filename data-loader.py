@@ -66,7 +66,9 @@ def load_data():
     new_rows = []
 
     for index, row in tqdm.tqdm(df.iterrows(), total=df.shape[0]):
-        new_row = {}    
+        new_row_w = {}    
+        new_row_l = {}    
+
         cards_in_row = set()
         for col in cols_to_keep:
             card_code = str(row[col])
@@ -81,26 +83,26 @@ def load_data():
         for card in card_dict.values():
             card_w = card + '_w'
             if card_w in cards_in_row:
-                new_row[card_w] = 1
+                new_row_w[card_w] = 1
             else:
-                new_row[card_w] = 0
+                new_row_w[card_w] = 0
         
-        for card in card_dict.values():
-            card_w = card + '_l'
-            if card_w in cards_in_row:
-                new_row[card_w] = 1
+            card_l = card + '_l'
+            if card_l in cards_in_row:
+                new_row_l[card_l] = 1
             else:
-                new_row[card_w] = 0
+                new_row_l[card_l] = 0
         
-        new_rows.append(new_row)
+        new_row_w.update(new_row_l)
+        new_rows.append(new_row_w)
 
         #should be plenty of rows
-        if index > 1500000:
+        if index > 1250000:
             break
     
     df_small = pd.DataFrame(new_rows)
         
-    df_small.to_csv("df_small.csv")
+    df_small.to_csv("df_small_1.csv")
             
 
 
