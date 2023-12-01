@@ -4,8 +4,8 @@ import os
 import tqdm
 from data_loader import create_data, load_data
 
-iterations = 2
-rows_of_data = 100000
+iterations = 1000
+rows_of_data = 10000
 
 def mean_negative_loglikelihood(Y, pYhat):
     """
