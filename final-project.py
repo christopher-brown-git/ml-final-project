@@ -4,6 +4,9 @@ import os
 import tqdm
 from data_loader import create_data, load_data
 
+iterations = 2
+rows_of_data = 100000
+
 def mean_negative_loglikelihood(Y, pYhat):
     """
     Function to compute the mean negative loglikelihood
@@ -69,7 +72,7 @@ class LogisticRegression:
 
         return grad_vec
     
-    def fit(self, Xmat, Y, max_iterations=1000, tolerance=1e-6, verbose=False):
+    def fit(self, Xmat, Y, max_iterations=iterations, tolerance=1e-6, verbose=False):
         """
         Train a logistic regression model using the training data in Xmat and Y
         """
@@ -115,37 +118,54 @@ class LogisticRegression:
         return ret
 
 
-
 def main():
     #check file exists
-    path = "df_small_1.csv"
-    if not os.path.isfile(path):
-        create_data()
+    data_path = "/home/scratch/24cjb4/df_small_" + str(rows_of_data//1000) + "k.csv"
+
+    if not os.path.isfile(data_path):
+        create_data(rows_of_data, data_path)
     
-    feature_names, data = load_data()
+
+    feature_names, data = load_data(data_path)
 
     model_basic = LogisticRegression(learning_rate=0.2, lamda=0.0)
     model_basic.fit(data["Xmat_train"], data["Y_train"])
 
-    model_lowl2 = LogisticRegression(learning_rate=0.2, lamda=0.0)
+    model_lowl2 = LogisticRegression(learning_rate=0.2, lamda=0.01)
     model_lowl2.fit(data["Xmat_train"], data["Y_train"])
 
-    model_highl2 = LogisticRegression(learning_rate=0.2, lamda=0.0)
+    model_highl2 = LogisticRegression(learning_rate=0.2, lamda=0.2)
     model_highl2.fit(data["Xmat_train"], data["Y_train"])
 
+    #training data
+    Yhat_train_basic = model_basic.predict(data["Xmat_train"])
+    Yhat_train_lowl2 = model_lowl2.predict(data["Xmat_train"])
+    Yhat_train_highl2 = model_highl2.predict(data["Xmat_train"])
 
+    accuracy_basic_train = accuracy(data["Y_train"], Yhat_train_basic)
+    accuracy_lowl2_train = accuracy(data["Y_train"], Yhat_train_lowl2)
+    accuracy_highl2_train = accuracy(data["Y_train"], Yhat_train_highl2)
+
+    #validation data
     Yhat_val_basic = model_basic.predict(data["Xmat_val"])
     Yhat_val_lowl2 = model_lowl2.predict(data["Xmat_val"])
     Yhat_val_highl2 = model_highl2.predict(data["Xmat_val"])
 
-    accuracy_basic = accuracy(data["Y_val"], Yhat_val_basic)
-    accuracy_lowl2 = accuracy(data["Y_val"], Yhat_val_lowl2)
-    accuracy_highl2 = accuracy(data["Y_val"], Yhat_val_highl2)
+    accuracy_basic_val = accuracy(data["Y_val"], Yhat_val_basic)
+    accuracy_lowl2_val = accuracy(data["Y_val"], Yhat_val_lowl2)
+    accuracy_highl2_val = accuracy(data["Y_val"], Yhat_val_highl2)
 
-    print("\nClash Royale data results:\n" + "-"*4)
-    print("Validation accuracy no regularization", accuracy_basic)
-    print("Validation accuracy lamda=0.01", accuracy_lowl2)
-    print("Validation accuracy lamda=0.2", accuracy_highl2)
+    f = open("out.b", "a")
+    f.write("\n**" + str(iterations) + " iterations of GD on " + str(rows_of_data//1000) + "k rows of data**")
+
+    f.write("\nTraining accuracy no regularization: " + str(accuracy_basic_train))
+    f.write("\nTraining accuracy lamda=0.01: " + str(accuracy_lowl2_train))
+    f.write("\nTraining accuracy lamda=0.2: " + str(accuracy_highl2_train) + "\n")
+
+    f.write("\nValidation accuracy no regularization: " + str(accuracy_basic_val))
+    f.write("\nValidation accuracy lamda=0.01: " + str(accuracy_lowl2_val))
+    f.write("\nValidation accuracy lamda=0.2: " + str(accuracy_highl2_val) + "\n\n")
+    f.close()
 
 
     # choose the best model

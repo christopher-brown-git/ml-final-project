@@ -6,7 +6,8 @@ import os
 import tqdm
 from sklearn.model_selection import train_test_split
 
-def create_data():
+
+def create_data(rows_of_data, data_path):
     paths_to_files = []
     directory = "data"
 
@@ -129,24 +130,24 @@ def create_data():
         new_rows.append(new_row_1)
 
         #should be plenty of rows
-        if index > 1500000:
+        if index >= rows_of_data:
             break
     
     df_small = pd.DataFrame(new_rows)
         
-    df_small.to_csv("df_small_1.csv")
+    df_small.to_csv(data_path)
 
 
-def load_data():
+def load_data(data_path):
     #load in data with pandas
-    data = pd.read_csv("df_small_1.csv")
+    data = pd.read_csv(data_path)
 
     #get outcome vector (it's all 1's bc the player with cards
     #in lower indexed columns is the winner)
     Y = np.array([x for x in data["Y"]])
 
     #create feature matrix
-    feature_names = [col for col in data.columns]
+    feature_names = [col for col in data.columns]   
     data_features = data[feature_names]
     Xmat = data_features.to_numpy(dtype=np.int8)
 
