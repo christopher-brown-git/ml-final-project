@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-path = "10krows.a"
+path = "100krows.a"
 #return 0 for error and 1 otherwise
 def visualize():
     if not os.path.isfile(path):
@@ -17,7 +17,14 @@ def visualize():
         if line[0:2] == "**":
             if len(info) > 0:
                 #plot
-                tests = list(info.keys())
+                tests = []
+                for k in list(info.keys()):
+                    if "=" in k:
+                        arr = k.split("=")
+                        tests.append(arr[0] + "\n=" + arr[1])
+                    else:
+                        tests.append(k)
+
                 accuracies = [float(x[1:-1]) for x in info.values()]
 
                 fig = plt.figure(figsize=(10, 6))
@@ -27,7 +34,7 @@ def visualize():
                 plt.xlabel("Different Models Created")
                 plt.ylabel("Accuracy")
                 plt.title(title)
-                plt.ylim(min(accuracies), max(accuracies))
+                plt.ylim(min(accuracies)-.10, max(accuracies)+.05)
 
                 plt.show()
 

@@ -1,7 +1,7 @@
 **1000 iterations of GD on 100k rows of data**
 Training no reg: 0.500140625
 Training lamda=0.01: 0.500140625
-Training  lamda=0.2: 0.500140625
+Training lamda=0.2: 0.500140625
 
 Validation no reg: 0.4970625
 Validation lamda=0.01: 0.4970625

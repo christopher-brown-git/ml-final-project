@@ -130,50 +130,53 @@ def main():
 
     model_basic = LogisticRegression(learning_rate=0.2, lamda=0.0)
     model_basic.fit(data["Xmat_train"], data["Y_train"])
-
-    model_lowl2 = LogisticRegression(learning_rate=0.2, lamda=0.01)
-    model_lowl2.fit(data["Xmat_train"], data["Y_train"])
-
-    model_highl2 = LogisticRegression(learning_rate=0.2, lamda=0.2)
-    model_highl2.fit(data["Xmat_train"], data["Y_train"])
-
-    #training data
-    Yhat_train_basic = model_basic.predict(data["Xmat_train"])
-    Yhat_train_lowl2 = model_lowl2.predict(data["Xmat_train"])
-    Yhat_train_highl2 = model_highl2.predict(data["Xmat_train"])
-
-    accuracy_basic_train = accuracy(data["Y_train"], Yhat_train_basic)
-    accuracy_lowl2_train = accuracy(data["Y_train"], Yhat_train_lowl2)
-    accuracy_highl2_train = accuracy(data["Y_train"], Yhat_train_highl2)
-
-    #validation data
-    Yhat_val_basic = model_basic.predict(data["Xmat_val"])
-    Yhat_val_lowl2 = model_lowl2.predict(data["Xmat_val"])
-    Yhat_val_highl2 = model_highl2.predict(data["Xmat_val"])
-
-    accuracy_basic_val = accuracy(data["Y_val"], Yhat_val_basic)
-    accuracy_lowl2_val = accuracy(data["Y_val"], Yhat_val_lowl2)
-    accuracy_highl2_val = accuracy(data["Y_val"], Yhat_val_highl2)
-
-    f = open("out.b", "a")
-    f.write("\n**" + str(iterations) + " iterations of GD on " + str(rows_of_data//1000) + "k rows of data**")
-
-    f.write("\nTraining accuracy no regularization: " + str(accuracy_basic_train))
-    f.write("\nTraining accuracy lamda=0.01: " + str(accuracy_lowl2_train))
-    f.write("\nTraining accuracy lamda=0.2: " + str(accuracy_highl2_train) + "\n")
-
-    f.write("\nValidation accuracy no regularization: " + str(accuracy_basic_val))
-    f.write("\nValidation accuracy lamda=0.01: " + str(accuracy_lowl2_val))
-    f.write("\nValidation accuracy lamda=0.2: " + str(accuracy_highl2_val) + "\n\n")
-    f.close()
-
-
-    # choose the best model
-    # best_model = model_lowl2 # EDIT ME
-    # Yhat_test = best_model.predict(data["Xmat_test"])
-    # print("Test accuracy", accuracy(data["Y_test"], Yhat_test))
-    # print("Clash Royale data weights", {feature_names[i]: round(best_model.theta[i], 2) for i in range(len(feature_names))})
     
+    Yhat_train_basic = model_basic.predict(data["Xmat_train"])
+
+    # model_lowl2 = LogisticRegression(learning_rate=0.2, lamda=0.01)
+    # model_lowl2.fit(data["Xmat_train"], data["Y_train"])
+
+    # model_highl2 = LogisticRegression(learning_rate=0.2, lamda=0.2)
+    # model_highl2.fit(data["Xmat_train"], data["Y_train"])
+    
+
+    # Yhat_train_lowl2 = model_lowl2.predict(data["Xmat_train"])
+    # Yhat_train_highl2 = model_highl2.predict(data["Xmat_train"])
+
+    # accuracy_basic_train = accuracy(data["Y_train"], Yhat_train_basic)
+    # accuracy_lowl2_train = accuracy(data["Y_train"], Yhat_train_lowl2)
+    # accuracy_highl2_train = accuracy(data["Y_train"], Yhat_train_highl2)
+
+    # #validation data
+    # Yhat_val_basic = model_basic.predict(data["Xmat_val"])
+    # Yhat_val_lowl2 = model_lowl2.predict(data["Xmat_val"])
+    # Yhat_val_highl2 = model_highl2.predict(data["Xmat_val"])
+
+    # accuracy_basic_val = accuracy(data["Y_val"], Yhat_val_basic)
+    # accuracy_lowl2_val = accuracy(data["Y_val"], Yhat_val_lowl2)
+    # accuracy_highl2_val = accuracy(data["Y_val"], Yhat_val_highl2)
+
+    # f = open("out.b", "a")
+    # f.write("\n**" + str(iterations) + " iterations of GD on " + str(rows_of_data//1000) + "k rows of data**")
+
+    # f.write("\nTraining accuracy \nno reg: " + str(accuracy_basic_train))
+    # f.write("\nTraining accuracy \nlamda=0.01: " + str(accuracy_lowl2_train))
+    # f.write("\nTraining accuracy \nlamda=0.2: " + str(accuracy_highl2_train) + "\n")
+
+    # f.write("\nValidation accuracy \nno reg: " + str(accuracy_basic_val))
+    # f.write("\nValidation accuracy \nlamda=0.01: " + str(accuracy_lowl2_val))
+    # f.write("\nValidation accuracy \nlamda=0.2: " + str(accuracy_highl2_val) + "\n\n")
+    # f.close()
+
+
+    #choose the best model
+    best_model = model_basic # EDIT ME
+    Yhat_test = best_model.predict(data["Xmat_test"])
+    
+    f = open("out.b", "a")
+    f.write("\nTest accuracy no reg: " + str(accuracy(data["Y_test"], Yhat_test)))
+    f.write("Clash Royale data weights: " + {feature_names[i]: round(best_model.theta[i], 2) for i in range(len(feature_names))})
+    f.close()
 
 if __name__ == "__main__":
     main()
