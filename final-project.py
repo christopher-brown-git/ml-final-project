@@ -350,6 +350,26 @@ class Value:
     def __truediv__(self, other): return self * other**-1
     def __rtruediv__(self, other): return other * self**-1
 
-    
+def sigmoid(value, scale=0.5):
+    """
+    sigmoid activation function
+    """
+    val1 = Value(-scale)
+    return 1/(1 + (val1*value).exp())
+
+def negative_log_likelihood(y, pY1):
+    """
+    Negative loglikelihood for a single example of data, i.e., 
+    Y and p(Y=1 | ...)
+    """
+    val1 = Value(1)
+    return -(y * pY1.log() + (val1 - y) * (val1 - pY1).log())
+
+class Neuron: 
+    """
+    Represents a single neuron in a neural network
+    A neuron computs a linear combination of its inputs and an intercept
+    and then passes it through a non-linear activation function
+    """
 if __name__ == "__main__":
     main()
