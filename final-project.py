@@ -218,7 +218,7 @@ class Value:
         #assign how gradients are backpropagated
 
         #for addition, you get the constant 1 because
-        #for 2 nodes x_1 and x_2 with parent x_3 and loss function L
+        #for 2 nodes x_1 and x_2 each with child x_3 and loss function L
         #let x_1 be self
         #dL/dx_1 = dL/dx_3 * dx_3/dx_1 and dx_3/dx_1 = d/dL (x_1 + x_2) = 1 + 0 = 1
 
@@ -240,7 +240,7 @@ class Value:
         out = Value(self.data * other.data, _parents=(self, other), _operation='*')
 
         #how gradients get assigned
-        #let x_3 be the parent node of x_1 and x_2 and L the loss
+        #let x_3 be the child node of x_1 and x_2 and L the loss
         #let x_1 be self
         # dL/dx_1 = dL/dx_3 * dx_3/dx_1 = out.grad * d/dx_1 (x_1 * x_2) = out.grad * other.data
         def _backward():
@@ -255,7 +255,101 @@ class Value:
         """
         Implement power operator **
         """
+
+        #ensure other is always a Value object
+        assert isinstance(other, (int, float)), "only support int/float powers now"
+        out = Value(self.data ** other, _parents=(self,), _operation="**" + str(other))
+
+        #dL/dx_1 = dL/dx_2 * dx_2/dx_1
+        def _backward():
+            self.grad += (other * (self.data**(other-1))) * out.grad        
         
+        out._backward = _backward
+
+        return out
+
+    def relu(self):
+        """
+        Implementation of the ReLU activation function
+        """
+
+        #ensure we always have a Value object
+        out = Value(0 if self.data < 0 else self.data, _parents=(self,), _operation=("ReLU"))
+
+        #if x_1 is the parent of x_2 and L is the loss
+        # dL/dx_1 = dL/dx_2 * dx_2/dx_1 = out.grad * dx_2/dx_1
+        def _backward():
+            self.grad += (out.data > 0) * out.grad
+        
+        out._backward = _backward
+        return out
+    
+    def exp(self):
+        """
+        Implement exponent (e^x where x is the data in a node)
+        """
+
+        #ensures we always have a Value object
+        out = Value(np.exp(self.data), _parents=(self,), _operation='e')
+        
+        #if x_1 is the parent of x_2 and L is the loss,
+        #dL/dx_1 = dL/dx_2 * dx_2/dx_1 = out.grad * e^(x_1) = out.grad * out.data
+        def _backward():
+            self.grad += out.data * out.grad
+
+        out._backward = _backward
+
+        return out
+    
+    def log(self):
+        """
+        Implement log function
+        """
+
+        #ensures always have a Value node
+        out = Value(np.log(self.data), _parents=(self,), _operation='log')
+
+        #if x_1 is the parent of x_2 and L is the loss,
+        #dL/dx_1 = dL/dx_2 * dx_2/dx_1 = out.grad * 1/x_1 = out.grad * 1/self.data
+       
+        def _backward():
+            self.grad += 1/self.data * out.grad
+        
+        out._backward = _backward
+
+        return out
+    
+    def backward(self):
+        """
+        Call _backward() method for each node in the neural network
+        Does so in reverse toplogical order, i.e. backpropagation
+        """
+
+        topo_ord = []
+        visited = set()
+
+        def build_topo_ord(node):
+            if node not in visited:
+                visited.add(node)
+                for parent in node._parents:
+                    build_topo_ord(parent)
+                topo_ord.append(node)
+
+        build_topo_ord(self)
+
+        self.grad = 1.0
+        for node in reversed(topo_ord):
+            node._backward()
+    
+    def __float__(self): return float(self.data)
+    def __radd__(self, other): return self + other
+    def __rmul__(self, other): return self * other
+    def __neg__(self): return self * -1
+    def __sub__(self, other): return self + (-other)
+    def __rsub__(self, other): return other + (-self)
+    def __truediv__(self, other): return self * other**-1
+    def __rtruediv__(self, other): return other * self**-1
+
     
 if __name__ == "__main__":
     main()
