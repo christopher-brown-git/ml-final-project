@@ -3,9 +3,10 @@ import numpy as np
 import os
 import tqdm
 from data_loader import create_data, load_data
+import random
 
 iterations = 1000
-rows_of_data = 10000
+rows_of_data = 100000
 
 def mean_negative_loglikelihood(Y, pYhat):
     """
@@ -175,8 +176,86 @@ def main():
     
     f = open("out.b", "a")
     f.write("\nTest accuracy no reg: " + str(accuracy(data["Y_test"], Yhat_test)))
-    f.write("Clash Royale data weights: " + {feature_names[i]: round(best_model.theta[i], 2) for i in range(len(feature_names))})
+    f.write("Clash Royale data weights: " + str({feature_names[i]: round(best_model.theta[i], 2) for i in range(len(feature_names))}))
     f.close()
 
+
+class Value:
+    def __init__(self, data=None, label="", _parents=set(), _operation=""):
+        """
+        Constructor for a value node
+        Value node contains data/the value, gradient, the parents node, 
+        and the operation applied to the parents node to produce the value
+        """
+
+        #initialize data randomly if none was provided
+        self.data = random.uniform(-1, 1) if data is None else data
+
+        self.grad = 0
+        self.label = label
+
+        #initialize the operation used to create the value/data
+        #initialize what the backward pass does
+        self._parents = set(_parents)
+        self._operation = _operation
+        self._backward = lambda: None
+    
+    def __repre__(self):
+        """
+        Helper class for printing the value
+        """
+        return f"Value(data={self.data}, label={self.label})"
+    
+    def __add__(self, other):
+        """
+        Implementing the plus operator
+        """
+
+        #ensure other is always a Value object
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data + other.data, _parents=(self, other), _operation='+')
+
+        #assign how gradients are backpropagated
+
+        #for addition, you get the constant 1 because
+        #for 2 nodes x_1 and x_2 with parent x_3 and loss function L
+        #let x_1 be self
+        #dL/dx_1 = dL/dx_3 * dx_3/dx_1 and dx_3/dx_1 = d/dL (x_1 + x_2) = 1 + 0 = 1
+
+        def _backward():
+            self.grad += 1*out.grad
+            other.grad += 1*out.grad
+        
+        out._backward = _backward
+
+        return out
+
+    def __mul__(self, other):
+        """
+        Implement multiplication
+        """
+
+        #ensures other is always a Value node
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data * other.data, _parents=(self, other), _operation='*')
+
+        #how gradients get assigned
+        #let x_3 be the parent node of x_1 and x_2 and L the loss
+        #let x_1 be self
+        # dL/dx_1 = dL/dx_3 * dx_3/dx_1 = out.grad * d/dx_1 (x_1 * x_2) = out.grad * other.data
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+
+        out._backward = _backward
+
+        return out
+
+    def __pow__(self, other):
+        """
+        Implement power operator **
+        """
+        
+    
 if __name__ == "__main__":
     main()
