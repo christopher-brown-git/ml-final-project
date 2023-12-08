@@ -119,67 +119,6 @@ class LogisticRegression:
         return ret
 
 
-def main():
-    #check file exists
-    data_path = "/home/scratch/24cjb4/df_small_" + str(rows_of_data//1000) + "k.csv"
-
-    if not os.path.isfile(data_path):
-        create_data(rows_of_data, data_path)
-    
-
-    feature_names, data = load_data(data_path)
-
-    model_basic = LogisticRegression(learning_rate=0.2, lamda=0.0)
-    model_basic.fit(data["Xmat_train"], data["Y_train"])
-    
-    Yhat_train_basic = model_basic.predict(data["Xmat_train"])
-
-    # model_lowl2 = LogisticRegression(learning_rate=0.2, lamda=0.01)
-    # model_lowl2.fit(data["Xmat_train"], data["Y_train"])
-
-    # model_highl2 = LogisticRegression(learning_rate=0.2, lamda=0.2)
-    # model_highl2.fit(data["Xmat_train"], data["Y_train"])
-    
-
-    # Yhat_train_lowl2 = model_lowl2.predict(data["Xmat_train"])
-    # Yhat_train_highl2 = model_highl2.predict(data["Xmat_train"])
-
-    # accuracy_basic_train = accuracy(data["Y_train"], Yhat_train_basic)
-    # accuracy_lowl2_train = accuracy(data["Y_train"], Yhat_train_lowl2)
-    # accuracy_highl2_train = accuracy(data["Y_train"], Yhat_train_highl2)
-
-    # #validation data
-    # Yhat_val_basic = model_basic.predict(data["Xmat_val"])
-    # Yhat_val_lowl2 = model_lowl2.predict(data["Xmat_val"])
-    # Yhat_val_highl2 = model_highl2.predict(data["Xmat_val"])
-
-    # accuracy_basic_val = accuracy(data["Y_val"], Yhat_val_basic)
-    # accuracy_lowl2_val = accuracy(data["Y_val"], Yhat_val_lowl2)
-    # accuracy_highl2_val = accuracy(data["Y_val"], Yhat_val_highl2)
-
-    # f = open("out.b", "a")
-    # f.write("\n**" + str(iterations) + " iterations of GD on " + str(rows_of_data//1000) + "k rows of data**")
-
-    # f.write("\nTraining accuracy \nno reg: " + str(accuracy_basic_train))
-    # f.write("\nTraining accuracy \nlamda=0.01: " + str(accuracy_lowl2_train))
-    # f.write("\nTraining accuracy \nlamda=0.2: " + str(accuracy_highl2_train) + "\n")
-
-    # f.write("\nValidation accuracy \nno reg: " + str(accuracy_basic_val))
-    # f.write("\nValidation accuracy \nlamda=0.01: " + str(accuracy_lowl2_val))
-    # f.write("\nValidation accuracy \nlamda=0.2: " + str(accuracy_highl2_val) + "\n\n")
-    # f.close()
-
-
-    #choose the best model
-    best_model = model_basic # EDIT ME
-    Yhat_test = best_model.predict(data["Xmat_test"])
-    
-    f = open("out.b", "a")
-    f.write("\nTest accuracy no reg: " + str(accuracy(data["Y_test"], Yhat_test)))
-    f.write("Clash Royale data weights: " + str({feature_names[i]: round(best_model.theta[i], 2) for i in range(len(feature_names))}))
-    f.close()
-
-
 class Value:
     def __init__(self, data=None, label="", _parents=set(), _operation=""):
         """
@@ -467,7 +406,7 @@ class MLP:
         """
         This method sets the gradients of every parameter to 0
         """
-        for p self.parameters():
+        for p in self.parameters():
             p.grad = 0
     
     def fit(self, Xmat_train, Y_train, Xmat_val=None, Y_val=None, max_epochs=100, verbose=False):
@@ -478,6 +417,118 @@ class MLP:
         Can take in validation inputs to test the generalization error
         """
 
+        #initialize parameter randomly
+        for p in self.parameters():
+            p.data = random.uniform(-1, 1)
+        
+        #iterate over epochs
+        for e in range(max_epochs):
+            n, d = Xmat_train.shape
+
+            shuffled_samples = np.arrange(0, n, 1).tolist()
+
+            np.random.shuffle(shuffled_samples)
+
+            for i in shuffled_samples:
+                py_i = self(Xmat_train[i])
+                loss = negative_log_likelihood(Y_train[i], py_i)
+
+                self._zero_grad() #zero gradient 
+                loss.backward() #calculate gradients
+
+                for param in self.parameters():
+                    param.data = param.data - self.learning_rate * param.grad
+                
+            if verbose:
+                self.train_mode = False
+
+                train_accuracy = accuracy(Y_train, self.predict(Xmat_train))
+
+                if Xmat_val is not None:
+                    val_accuracy = accuracy(Y_val, self.predict(Xmat_val))
+                    print(f"Epoch {e}: Training accuracy {train_accuracy:.0f}%, Validation accuracy {val_accuracy:.0f}%")
+                else:
+                    print(f"Epoch {e}: Training accuracy {train_accuracy:.0f}%")
+            
+            self.train_mode = True
+        
+        self.train_mode = False
+
+    def predict(self, Xmat):
+        """
+        Predict method which returns a list of 0/1 labels for the given input data
+        """
+
+        return [int(self(x).data > 0.5) for x in Xmat]
+
+def logistic_regression(feature_names, data):
+    
+    model_basic = LogisticRegression(learning_rate=0.2, lamda=0.0)
+    model_basic.fit(data["Xmat_train"], data["Y_train"])
+    
+    Yhat_train_basic = model_basic.predict(data["Xmat_train"])
+
+    # model_lowl2 = LogisticRegression(learning_rate=0.2, lamda=0.01)
+    # model_lowl2.fit(data["Xmat_train"], data["Y_train"])
+
+    # model_highl2 = LogisticRegression(learning_rate=0.2, lamda=0.2)
+    # model_highl2.fit(data["Xmat_train"], data["Y_train"])
+    
+
+    # Yhat_train_lowl2 = model_lowl2.predict(data["Xmat_train"])
+    # Yhat_train_highl2 = model_highl2.predict(data["Xmat_train"])
+
+    # accuracy_basic_train = accuracy(data["Y_train"], Yhat_train_basic)
+    # accuracy_lowl2_train = accuracy(data["Y_train"], Yhat_train_lowl2)
+    # accuracy_highl2_train = accuracy(data["Y_train"], Yhat_train_highl2)
+
+    # #validation data
+    # Yhat_val_basic = model_basic.predict(data["Xmat_val"])
+    # Yhat_val_lowl2 = model_lowl2.predict(data["Xmat_val"])
+    # Yhat_val_highl2 = model_highl2.predict(data["Xmat_val"])
+
+    # accuracy_basic_val = accuracy(data["Y_val"], Yhat_val_basic)
+    # accuracy_lowl2_val = accuracy(data["Y_val"], Yhat_val_lowl2)
+    # accuracy_highl2_val = accuracy(data["Y_val"], Yhat_val_highl2)
+
+    # f = open("out.b", "a")
+    # f.write("\n**" + str(iterations) + " iterations of GD on " + str(rows_of_data//1000) + "k rows of data**")
+
+    # f.write("\nTraining accuracy \nno reg: " + str(accuracy_basic_train))
+    # f.write("\nTraining accuracy \nlamda=0.01: " + str(accuracy_lowl2_train))
+    # f.write("\nTraining accuracy \nlamda=0.2: " + str(accuracy_highl2_train) + "\n")
+
+    # f.write("\nValidation accuracy \nno reg: " + str(accuracy_basic_val))
+    # f.write("\nValidation accuracy \nlamda=0.01: " + str(accuracy_lowl2_val))
+    # f.write("\nValidation accuracy \nlamda=0.2: " + str(accuracy_highl2_val) + "\n\n")
+    # f.close()
+
+
+    #choose the best model
+    best_model = model_basic # EDIT ME
+    Yhat_test = best_model.predict(data["Xmat_test"])
+    
+    f = open("out.b", "a")
+    f.write("\nTest accuracy no reg: " + str(accuracy(data["Y_test"], Yhat_test)))
+    f.write("Clash Royale data weights: " + str({feature_names[i]: round(best_model.theta[i], 2) for i in range(len(feature_names))}))
+    f.close() 
+
+def neural_network(feature_names, data):
+    pass
+
+def main(feature_names, data):
+
+    #logistic_regression(feature_names, data)
+    neural_network(feature_names, data)
 
 if __name__ == "__main__":
-    main()
+    #check file exists
+    data_path = "/home/scratch/24cjb4/df_small_" + str(rows_of_data//1000) + "k.csv"
+
+    if not os.path.isfile(data_path):
+        create_data(rows_of_data, data_path)
+    
+
+    feature_names, data = load_data(data_path)
+
+    main(feature_names, data)
