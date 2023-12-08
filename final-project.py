@@ -371,5 +371,113 @@ class Neuron:
     A neuron computs a linear combination of its inputs and an intercept
     and then passes it through a non-linear activation function
     """
+
+    def __init__(self, n_inputs):
+        """
+        Constructor: initializes a parameter for each input, in
+        addition to one for an intercept
+        """
+        self.theta = [Value(random.uniform(-1, 1) for _ in range(n_inputs))]
+        self.intercept = Value(random.uniform(-1, 1))
+    
+    def __call__(self, x, relu=False, dropout_proba=0.1, train_mode=False):
+        """
+        Implementing call operator
+        """
+        if train_mode:
+            d = [0]*len(self.theta)
+            for i in range(len(d)):
+                if random.uniform(0, 1) > dropout_proba:
+                    d[i] = 1
+            
+            out = sum([self.theta[i]*x[i]*d[i] for i in range(len(self.theta))]) + self.intercept
+        else:
+            out = sum([self.theta[i]*x[i]*(1 - dropout_proba) for i in range(len(self.theta))]) + self.intercept
+
+        if relu:
+            return out.relu()
+        return sigmoid(out)
+    
+    def parameters(self):
+        """
+        Returns a list of all parameters in the neuron
+        """
+        return self.theta + [self.intercept]
+
+class Layer:
+    """
+    Class for implementing 1 layer of a neural network
+    """
+
+    def __init__(self, n_inputs, n_outputs):
+        """
+        Constructor to initialize the layer with neurons
+        """
+        self.neurons = [Neuron(n_inputs) for _ in range(n_outputs)]
+    
+    def __call__(self, x, relu=True, dropout_proba=0.1, train_mode=False):
+        """
+        Implementing the function call operator, ()
+        """
+
+        outputs = [n(x, relu, dropout_proba, train_mode=train_mode) for n in self.neurons]
+        return outputs[0] if len(outputs) == 1 else outputs
+    
+    def parameters(self):
+        """
+        Method to return a list of every parameter in the layer
+        """
+        return [p for neuron in self.neurons for p in neuron.parameters()]
+    
+class MLP:
+    """
+    This class implements a multilayer perceptron
+    """
+
+    def __init__(self, n_features, layer_sizes, learning_rate=0.01, dropout_proba=0.1):
+        """
+        Constructor initializing layers of appropriate width
+        """
+
+        layer_sizes = [n_features] + layer_sizes
+        self.layers = [Layer(layer_sizes[i], layer_sizes[i+1]) for i in range(len(layer_sizes-1))]
+        self.dropout_proba = dropout_proba
+        self.learning_rate = learning_rate
+
+        self.train_mode = True #determines when we are training vs testing--when to use dropout or not
+    
+    def __cal__(self, x):
+        """
+        call, (), operator that calls each layer in the neural network, 
+        using the outputs of a layer as the inputs to the next layer
+        """
+
+        out = x
+        for layer in self.layers[0:len(self.layers)-1]:
+            out = layer(out, relu=True, dropout_proba=self.dropout_proba, train_mode=self.train_mode)
+        return self.layers[-1](out, relu=False)
+    
+    def parameters(self):
+        """
+        Returns a list of parameters of the neural network
+        """
+        return [p for layer in self.layers for p in layer.parameters()]
+
+    def _zero_grad(self):
+        """
+        This method sets the gradients of every parameter to 0
+        """
+        for p self.parameters():
+            p.grad = 0
+    
+    def fit(self, Xmat_train, Y_train, Xmat_val=None, Y_val=None, max_epochs=100, verbose=False):
+        """
+        Fit parameters of the neural network to the given data using SGD (stochastic gradient descent)
+        SGD ends after reaching the max # of epochs
+
+        Can take in validation inputs to test the generalization error
+        """
+
+
 if __name__ == "__main__":
     main()
