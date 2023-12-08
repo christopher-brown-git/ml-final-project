@@ -213,7 +213,12 @@ def create_data_complex(rows_of_data, data_path):
     df = pd.read_csv(paths_to_files[0])
 
 
-    cols_to_keep = {"winner.cards.list", "loser.cards.list"}
+    cols_to_keep = {"winner.cards.list", "winner.totalcard.level", "winner.troop.count", 
+                    "winner.structure.count", "winner.spell.count", "winner.common.count", 
+                    "winner.rare.count", "winner.epic.count", "winner.legendary.count", "winner.elixir.average",
+                    "loser.cards.list", "loser.totalcard.level", "loser.troop.count", 
+                    "loser.structure.count", "loser.spell.count", "loser.common.count", 
+                    "loser.rare.count", "loser.epic.count", "loser.legendary.count", "loser.elixir.average"}
 
     cols_to_drop = []
     for col in df.columns:

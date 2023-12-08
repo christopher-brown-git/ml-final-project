@@ -1,2 +1,7 @@
 data/*
 df_small*
+webscraper/bin
+webscraper/include
+webscraper/lib
+webscraper/lib64
+webscraper/share
