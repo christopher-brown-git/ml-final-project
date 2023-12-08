@@ -25,7 +25,12 @@ def accuracy(Y, Yhat):
     Y: vector of true labels
     Yhat: vector of estimated 0/1 probabilities
     """
-    return np.sum(Y==Yhat)/len(Y)
+    #return np.sum(Y==Yhat)/len(Y)
+    acc = 0
+    for y, yhat in zip(Y, Yhat):
+        if y == yhat: acc += 1
+    
+    return acc/len(Y) * 100
 
 def sigmoid(V):
     """
@@ -379,13 +384,13 @@ class MLP:
         """
 
         layer_sizes = [n_features] + layer_sizes
-        self.layers = [Layer(layer_sizes[i], layer_sizes[i+1]) for i in range(len(layer_sizes-1))]
+        self.layers = [Layer(layer_sizes[i], layer_sizes[i+1]) for i in range(len(layer_sizes)-1)]
         self.dropout_proba = dropout_proba
         self.learning_rate = learning_rate
 
         self.train_mode = True #determines when we are training vs testing--when to use dropout or not
     
-    def __cal__(self, x):
+    def __call__(self, x):
         """
         call, (), operator that calls each layer in the neural network, 
         using the outputs of a layer as the inputs to the next layer
@@ -421,11 +426,13 @@ class MLP:
         for p in self.parameters():
             p.data = random.uniform(-1, 1)
         
+        #for iteration in tqdm.tqdm(range(0, max_iterations), total=max_iterations):
+
         #iterate over epochs
-        for e in range(max_epochs):
+        for e in tqdm.tqdm(range(0, max_epochs), total=max_epochs):
             n, d = Xmat_train.shape
 
-            shuffled_samples = np.arrange(0, n, 1).tolist()
+            shuffled_samples = np.arange(0, n, 1).tolist()
 
             np.random.shuffle(shuffled_samples)
 
@@ -519,12 +526,15 @@ def neural_network(feature_names, data):
 
     #neural net with no dropout
     random.seed(42)
-    arc = [8, 4, 1]
+    arc = [4, 5, 2, 7, 3, 2, 1]
     mlp_1 = MLP(n_features=d, layer_sizes=arc, learning_rate=0.05, dropout_proba=0.0)
     mlp_1.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
     train_acc_1 = accuracy(data["Y_train"], mlp_1.predict(data["Xmat_train"]))
     val_acc_1 = accuracy(data["Y_val"], mlp_1.predict(data["Xmat_val"]))
-    print(f"Final training accuracy: {train_acc_1:.0f}%, Validation accuracy: {val_acc_1:.0f}%")
+
+    f = open("net.txt", "a")
+    f.write(f"Final training accuracy: {train_acc_1:.0f}%, Validation accuracy: {val_acc_1:.0f}%")
+    f.write("\n")
 
     random.seed(0)
     print("Training neural net with dropout=0.5")
@@ -532,8 +542,8 @@ def neural_network(feature_names, data):
     mlp_2.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
     train_acc_2 = accuracy(data["Y_train"], mlp_2.predict(data["Xmat_train"]))
     val_acc_2 = accuracy(data["Y_val"], mlp_2.predict(data["Xmat_val"]))
-    print(f"Final training accuracy: {train_acc_2:.0f}%, Validation accuracy: {val_acc_2:.0f}%")
-
+    f.write(f"Final training accuracy: {train_acc_2:.0f}%, Validation accuracy: {val_acc_2:.0f}%")
+    f.close()
 
 
 def main(feature_names, data):
@@ -546,9 +556,9 @@ if __name__ == "__main__":
     data_path = "/home/scratch/24cjb4/df_small_" + str(rows_of_data//1000) + "k.csv"
 
     if not os.path.isfile(data_path):
-        create_data(rows_of_data, data_path)
+        create_data_simple(rows_of_data, data_path)
     
 
-    feature_names, data = load_data(data_path)
+    feature_names, data = load_data_simple(data_path)
 
     main(feature_names, data)
