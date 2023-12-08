@@ -514,7 +514,27 @@ def logistic_regression(feature_names, data):
     f.close() 
 
 def neural_network(feature_names, data):
-    pass
+    
+    n, d = data["Xmat_train"].shape
+
+    #neural net with no dropout
+    random.seed(42)
+    arc = [8, 4, 1]
+    mlp_1 = MLP(n_features=d, layer_sizes=arc, learning_rate=0.05, dropout_proba=0.0)
+    mlp_1.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
+    train_acc_1 = accuracy(data["Y_train"], mlp_1.predict(data["Xmat_train"]))
+    val_acc_1 = accuracy(data["Y_val"], mlp_1.predict(data["Xmat_val"]))
+    print(f"Final training accuracy: {train_acc_1:.0f}%, Validation accuracy: {val_acc_1:.0f}%")
+
+    random.seed(0)
+    print("Training neural net with dropout=0.5")
+    mlp_2 = MLP(n_features=d, layer_sizes=arc, learning_rate=0.05, dropout_proba=0.5)
+    mlp_2.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
+    train_acc_2 = accuracy(data["Y_train"], mlp_2.predict(data["Xmat_train"]))
+    val_acc_2 = accuracy(data["Y_val"], mlp_2.predict(data["Xmat_val"]))
+    print(f"Final training accuracy: {train_acc_2:.0f}%, Validation accuracy: {val_acc_2:.0f}%")
+
+
 
 def main(feature_names, data):
 
