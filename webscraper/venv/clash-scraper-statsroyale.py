@@ -4,8 +4,6 @@ import tqdm
 from bs4 import BeautifulSoup
 import pickle
 
-#USE DECK SHOP INSTEAD OF STATS ROYALE
-
 URL = "https://statsroyale.com/cards"
 page = requests.get(URL)
 
