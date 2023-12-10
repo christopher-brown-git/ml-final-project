@@ -7,3 +7,5 @@ Final training accuracy: 50%, Validation accuracy: 50%
 Final training accuracy: 50%, Validation accuracy: 50%
 
 [4, 5, 2, 7, 3, 2, 1] cards = only features 40.50 s/it
+Final training accuracy: 50%, Validation accuracy: 50%
+Final training accuracy: 50%, Validation accuracy: 50%

@@ -3,6 +3,7 @@
 import pandas as pd
 import numpy as np
 import os
+import pickle
 import tqdm
 from sklearn.model_selection import train_test_split
 
@@ -229,6 +230,12 @@ def create_data_complex(rows_of_data, data_path):
 
     new_rows = []
 
+    #load in clash royale card data
+    stats = ''
+    with open('stats.pkl', 'rb') as file:
+        stats = pickle.load(file)
+
+
     #player 1's cards are always the lower indexed columns
     #player 2's cards are always the higher indexed columns
     #outcome vector is 1 if player1 won and 2 if player2 won
@@ -246,10 +253,12 @@ def create_data_complex(rows_of_data, data_path):
 
             if player == "w":
                 for code in codes:
-                    cards_in_row.add(card_dict[str(code)] + '_w')
+                    card = card_dict[str(code)]
+                    cards_in_row.add(card + '_w')
             else:
                 for code in codes:
-                    cards_in_row.add(card_dict[str(code)] + '_l')
+                    card = card_dict[str(code)]
+                    cards_in_row.add(card + '_l')
         
         #flip coin to determine whether or not player1 is the winner or player2 is the winner
         # > .5 means that player1 is the winner
@@ -261,7 +270,23 @@ def create_data_complex(rows_of_data, data_path):
         if np.random.rand() > 0.5:
             winner_is_1 = 1
             new_row_1[Y] = 1
+        
+        new_features = {}
+        new_features["hitpoints_w"] = 0
+        new_features["hitpoints_l"] = 0
+        
+        new_features["building_damage_w"]
+        new_features["building_damage_l"]
 
+        #normal damage = sp
+        new_features["normal_damage_w"]
+        new_features["normal_damage_l"]
+
+        new_features["spell_tower_damage_w"]
+        new_features["spell_tower_damage_l"]
+
+        new_features["spell_area_damage_w"]
+        new_features["spell_area_damage_l"]
 
         for card in card_dict.values():
             card_w = card + '_w'
@@ -271,6 +296,7 @@ def create_data_complex(rows_of_data, data_path):
             card_2 = card + '_2'
 
             if card_w in cards_in_row:
+
                 if winner_is_1:
                     new_row_1[card_1] = 1
                 else:
