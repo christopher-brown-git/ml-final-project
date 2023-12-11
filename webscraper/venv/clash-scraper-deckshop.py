@@ -92,7 +92,7 @@ for name, link in tqdm.tqdm(names_to_link.items(), total=len(names_to_link)):
                 else:
                     span_headers.append("".join(other_card.find("img")['alt'].split()))
             else:
-                span_headers.append(span_header.text)
+                span_headers.append("".join(span_header.text.split()))
 
         stats_names = []
         for s_h in span_headers:
@@ -143,6 +143,18 @@ for name, link in tqdm.tqdm(names_to_link.items(), total=len(names_to_link)):
                     stats[name][new_stat] = speed_to_num[val]
                 else:
                     stats[name][new_stat] = float(val)
+    
+f = open("stats.txt", "a")
+
+unique_stats = set()
+for name in stats.keys():
+    f.write(name)
+    f.write(str(stats[name]))
+    unique_stats.update(stats[name].keys())
+    f.write("\n")
+
+f.close()
+
 
 #write dictionary of statistics to a pkl file
 with open('stats.pkl', 'wb') as file:
