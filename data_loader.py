@@ -228,6 +228,8 @@ def create_data_complex(rows_of_data, data_path):
                             "DefensiveBuilding":"Tot_Defensive_Buildings", "MeleeRange": "Avg_MeleeRange", "Air":"Tot_Air", "Ground": "Tot_Ground"}
     
     card_features = ['Goblins', 'FireSpirit', 'Bats', 'Skeletons', 'Barbarians', 'SpearGoblins', 'RoyalRecruits']
+
+    spawners = {"Tombstone", "Furnace", "BarbarianHut", "GoblinHit", "GoblinDrill", "Graveyard"}
     
     cols_to_drop = []
     for col in df.columns:
@@ -261,18 +263,31 @@ def create_data_complex(rows_of_data, data_path):
             row[tag + new_feature] += int(stats[card][feature][0]) * mult #hope that avg.card.level feature will account for differences in card levels --> future work
         else:
             #average
+            print(feature)
             row[tag + new_feature] += (int(stats[card][feature][0]) * mult)/8
 
-    def add_values_inner(row, card, tag):
+    def handle_card(row, card, tag):
         for feature in stats[card].keys():
             handle_feature(row, feature, card, tag)
             
     def add_values_outer(row, card, tag):
-        for feature in stats[card].keys():
-            if feature in card_features:
-                add_values_inner(row, feature, tag)
+        if card in spawners:
+            d = stats[card]
+            lifetime = d['Lifetime']
+            spawnspeed = d['SpawnSpeed']
+            spawnnumber = d['SpawnNumber']
+            spawnondeath = d['SpawnOnDeath']
 
-            handle_feature(row, feature, card, tag)
+            num = (lifetime//spawnspeed) * spawnnumber + spawnondeath
+
+            for _ in range(num):
+                handle_card(row, stats[card]['Spawn'], tag)
+        else:
+            for feature in stats[card].keys():
+                if feature in card_features:
+                    handle_card(row, feature, tag)
+
+                handle_feature(row, feature, card, tag)
 
     for index, row in tqdm.tqdm(df.iterrows(), total=df.shape[0]):
         new_row_1 = {}    
