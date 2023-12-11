@@ -6,7 +6,7 @@ from data_loader import create_data_simple, load_data_simple, create_data_comple
 import random
 
 iterations = 1000
-rows_of_data = 100000
+rows_of_data = 10000
 
 def mean_negative_loglikelihood(Y, pYhat):
     """
