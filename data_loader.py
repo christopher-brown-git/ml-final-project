@@ -257,11 +257,11 @@ def create_data_complex(rows_of_data, data_path):
         tot = True if new_feature.split("_")[0][0] == "T" else False
 
         if tot:
-            mult = stats[card]['mult']
-            row[tag + new_feature] += stats[card][feature][0] * mult #hope that avg.card.level feature will account for differences in card levels --> future work
+            mult = int(stats[card]['mult'])
+            row[tag + new_feature] += int(stats[card][feature][0]) * mult #hope that avg.card.level feature will account for differences in card levels --> future work
         else:
             #average
-            row[tag + new_feature] += (stats[card][feature][0] * mult)/8
+            row[tag + new_feature] += (int(stats[card][feature][0]) * mult)/8
 
     def add_values_inner(row, card, tag):
         for feature in stats[card].keys():
