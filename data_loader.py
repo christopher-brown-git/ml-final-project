@@ -248,6 +248,32 @@ def create_data_complex(rows_of_data, data_path):
     #player 2's cards are always the higher indexed columns
     #outcome vector is 1 if player1 won and 2 if player2 won
 
+    def handle_feature(row, feature, card, tag):
+        if feature == 'Level':
+            return
+        
+        new_feature = new_features_map[feature]
+        #do we average the stat or sum it?
+        tot = True if new_feature.split("_")[0][0] == "T" else False
+
+        if tot:
+            mult = stats[card]['mult']
+            row[tag + new_feature] += stats[card][feature][0] * mult #hope that avg.card.level feature will account for differences in card levels --> future work
+        else:
+            #average
+            row[tag + new_feature] += (stats[card][feature][0] * mult)/8
+
+    def add_values_inner(row, card, tag):
+        for feature in stats[card].keys():
+            handle_feature(row, feature, card, tag)
+            
+    def add_values_outer(row, card, tag):
+        for feature in stats[card].keys():
+            if feature in card_features:
+                add_values_inner(row, feature, tag)
+
+            handle_feature(row, feature, card, tag)
+
     for index, row in tqdm.tqdm(df.iterrows(), total=df.shape[0]):
         new_row_1 = {}    
         new_row_2 = {}
@@ -317,56 +343,14 @@ def create_data_complex(rows_of_data, data_path):
 
             card_1 = card + '_1'
             card_2 = card + '_2'
-
-            winner_card_avg = row["winner.totalcard.level"]//8
-            loser_card_avg = row["loser.totalcard.level"]//8
-                
-            def add_values(row, card, tag):
-                for feature in stats[card].keys():
-                    new_feature = new_features_map[card]
-                    #do we average the stat or sum it?
-                    tot = True if new_feature.split("_")[0][0] == "T" else False
-
-                    if player == "w":
-                        if winner_is_1:
-                            add_values(new_row_1, )
-                        else:
-                            pass
-                    else:
-                        if winner_is_1:
-                            pass
-                        else:
-                            pass
-
-            def add_values_wrapper(row, card, tag):
-                for feature in stats[card].keys():
-                    if feature in card_features:
-                        add_values(row, feature, tag)
-
-                    new_feature = new_features_map[card]
-                    #do we average the stat or sum it?
-                    tot = True if new_feature.split("_")[0][0] == "T" else False
-
-                    if player == "w":
-                        if winner_is_1:
-                            if tot:
-                                row[new_feature + tag] += stats[card][feature] *
-                            else:
-
-                        else:
-                            pass
-                    else:
-                        if winner_is_1:
-                            pass
-                        else:
-                            pass
             
             if card_w in cards_in_row:
                 if winner_is_1:
                     new_row_1[card_1] = 1
-                    add_values_wrapper(new_row_1, card, "_1")
+                    add_values_outer(new_row_1, card, "1_") #pass dictionaries by reference in python
                 else:
                     new_row_2[card_2] = 1
+                    add_values_outer(new_row_2, card, "2_") #pass dictionaries by reference in python
             else:
                 if winner_is_1:
                     new_row_1[card_1] = 0
@@ -376,134 +360,10 @@ def create_data_complex(rows_of_data, data_path):
             if card_l in cards_in_row:
                 if winner_is_1:
                     new_row_2[card_2] = 1
+                    add_values_outer(new_row_2, card, "2_")
                 else:
                     new_row_1[card_1] = 1
-            else:
-                if winner_is_1:
-                    new_row_2[card_2] = 0
-                else:
-                    new_row_1[card_1] = 0
-            
-
-
-                for feature in stats[card].keys():
-                    if feature == "Level":
-                        continue
-                    elif feature in card_features:
-                        for f in stats[feature].keys():
-                            feat = f
-                            index = stats[feature]['Level'].index(winner_card_avg)
-
-                            #could happen due to legendary cards having higher levels by default, could fix later
-                            if (index == -1):
-                                index = 0
-                            
-                            poss_feature = stats[feature].get(f, 0)
-                            if poss_feature == 0:
-                                continue
-                            
-                            new_row_1[f+"_1"] += poss_feature[index]*stats[feature]['mult']
-                    elif feature in new_features:
-                        feat = feature
-                        index = stats[card]['Level'].index(winner_card_avg)
-
-                        #could happen due to legendary cards having higher levels by default, could fix later
-                        if (index == -1):
-                            index = 0
-                        
-                        poss_feature = stats[feature].get(f, 0)
-
-                        if poss_feature == 0:
-                                continue
-                        
-                        new_row_1[feat+"_1"] += poss_feature[index]*stats[card]['mult']
-                    else:
-                        
-
-                new_row_1[card_1] = 1
-                else:
-                    for feature in stats[card].keys():
-                        if feature == "Level":
-                            continue
-                        elif feature in card_features:
-                            for f in stats[feature].keys():
-                                feat = f
-                                index = stats[feature]['Level'].index(winner_card_avg)
-
-                                #could happen due to legendary cards having higher levels by default, could fix later
-                                if (index == -1):
-                                    index = 0
-                                
-                                new_row_2[f+"_1"] += stats[feature].get(f, 0)[index]*stats[feature]['mult']
-                        else:
-                            feat = feature
-                            index = stats[card]['Level'].index(winner_card_avg)
-
-                            #could happen due to legendary cards having higher levels by default, could fix later
-                            if (index == -1):
-                                index = 0
-                            
-                            new_row_2[feat+"_1"] += stats[card].get(feat, 0)[index]*stats[card]['mult']
-
-                    new_row_2[card_2] = 1
-            else:
-                if winner_is_1:
-                    new_row_1[card_1] = 0
-                else:
-                    new_row_2[card_2] = 0
-
-            
-            if card_l in cards_in_row:
-                if winner_is_1:
-                    for feature in stats[card].keys():
-                        if feature == "Level":
-                            continue
-                        elif feature in card_features:
-                            for f in stats[feature].keys():
-                                feat = f
-                                index = stats[feature]['Level'].index(loser_card_avg)
-
-                                #could happen due to legendary cards having higher levels by default, could fix later
-                                if (index == -1):
-                                    index = 0
-                                
-                                new_row_2[f+"_1"] += stats[feature].get(f, 0)[index]*stats[feature]['mult']
-                        else:
-                            feat = feature
-                            index = stats[card]['Level'].index(loser_card_avg)
-
-                            #could happen due to legendary cards having higher levels by default, could fix later
-                            if (index == -1):
-                                index = 0
-                            
-                            new_row_2[feat+"_1"] += stats[card].get(feat, 0)[index]*stats[card]['mult']
-
-                    new_row_2[card_2] = 1
-                else:
-                    for feature in stats[card].keys():
-                        if feature == "Level":
-                            continue
-                        elif feature in card_features:
-                            for f in stats[feature].keys():
-                                feat = f+"_1"
-                                index = stats[feature]['Level'].index(loser_card_avg)
-
-                                #could happen due to legendary cards having higher levels by default, could fix later
-                                if (index == -1):
-                                    index = 0
-                                
-                                new_row_1[f] += stats[feature].get(f, 0)[index]*stats[feature]['mult']
-                        else:
-                            feat = feature+"_1"
-                            index = stats[card]['Level'].index(loser_card_avg)
-
-                            #could happen due to legendary cards having higher levels by default, could fix later
-                            if (index == -1):
-                                index = 0
-                            
-                            new_row_1[feat] += stats[card].get(feat, 0)[index]*stats[card]['mult']
-
-                    new_row_1[card_1] = 1
+                    add_values_outer(new_row_1, card, "1_")
             else:
                 if winner_is_1:
                     new_row_2[card_2] = 0
