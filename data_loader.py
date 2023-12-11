@@ -224,8 +224,8 @@ def create_data_complex(rows_of_data, data_path):
     new_features_map = {"Healing": "Tot_Healing", "Hitpoints" : "Tot_Hitpoints", "Towerdamage": "Tot_Towerdamage",
                             "Hitspeed": "Avg_Hitspeed", "Deathdamage": "Tot_Deathdamage", "Damage": "Tot_Damage",
                             "Shield": "Tot_Shield", "Spellradius": "Avg_Spellradius", "Range": "Avg_Range",
-                            "Speed": "Avg_Speed", "Buildingdamage": "Tot_Buildingdamage", "SiegeBuilding": "Num_Siege_Buildings",
-                            "DefensiveBuilding":"Num_Defensive_Buildings", "MeleeRange": "Avg_MeleeRange", "Air":"Num_Air", "Ground": "Num_Ground"}
+                            "Speed": "Avg_Speed", "Buildingdamage": "Tot_Buildingdamage", "SiegeBuilding": "Tot_Siege_Buildings",
+                            "DefensiveBuilding":"Tot_Defensive_Buildings", "MeleeRange": "Avg_MeleeRange", "Air":"Tot_Air", "Ground": "Tot_Ground"}
     
     card_features = ['Goblins', 'FireSpirit', 'Bats', 'Skeletons', 'Barbarians', 'SpearGoblins', 'RoyalRecruits']
     
@@ -320,8 +320,72 @@ def create_data_complex(rows_of_data, data_path):
 
             winner_card_avg = row["winner.totalcard.level"]//8
             loser_card_avg = row["loser.totalcard.level"]//8
+                
+            def add_values(row, card, tag):
+                for feature in stats[card].keys():
+                    new_feature = new_features_map[card]
+                    #do we average the stat or sum it?
+                    tot = True if new_feature.split("_")[0][0] == "T" else False
+
+                    if player == "w":
+                        if winner_is_1:
+                            add_values(new_row_1, )
+                        else:
+                            pass
+                    else:
+                        if winner_is_1:
+                            pass
+                        else:
+                            pass
+
+            def add_values_wrapper(row, card, tag):
+                for feature in stats[card].keys():
+                    if feature in card_features:
+                        add_values(row, feature, tag)
+
+                    new_feature = new_features_map[card]
+                    #do we average the stat or sum it?
+                    tot = True if new_feature.split("_")[0][0] == "T" else False
+
+                    if player == "w":
+                        if winner_is_1:
+                            if tot:
+                                row[new_feature + tag] += stats[card][feature] *
+                            else:
+
+                        else:
+                            pass
+                    else:
+                        if winner_is_1:
+                            pass
+                        else:
+                            pass
             
             if card_w in cards_in_row:
+                if winner_is_1:
+                    new_row_1[card_1] = 1
+                    add_values_wrapper(new_row_1, card, "_1")
+                else:
+                    new_row_2[card_2] = 1
+            else:
+                if winner_is_1:
+                    new_row_1[card_1] = 0
+                else:
+                    new_row_2[card_2] = 0
+            
+            if card_l in cards_in_row:
+                if winner_is_1:
+                    new_row_2[card_2] = 1
+                else:
+                    new_row_1[card_1] = 1
+            else:
+                if winner_is_1:
+                    new_row_2[card_2] = 0
+                else:
+                    new_row_1[card_1] = 0
+            
+
+
                 for feature in stats[card].keys():
                     if feature == "Level":
                         continue
