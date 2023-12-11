@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 import tqdm
-from data_loader import create_data, load_data
+from data_loader import create_data_simple, load_data_simple, create_data_complex, load_data_complex
 import random
 
 iterations = 1000
@@ -553,12 +553,11 @@ def main(feature_names, data):
 
 if __name__ == "__main__":
     #check file exists
-    data_path = "/home/scratch/24cjb4/df_small_" + str(rows_of_data//1000) + "k.csv"
+    data_path = "/home/scratch/24cjb4/df_more_features_" + str(rows_of_data//1000) + "k.csv"
 
     if not os.path.isfile(data_path):
-        create_data_simple(rows_of_data, data_path)
-    
+        create_data_complex(rows_of_data, data_path)
 
-    feature_names, data = load_data_simple(data_path)
+    # feature_names, data = load_data_complex(data_path)
 
-    main(feature_names, data)
+    # main(feature_names, data)
