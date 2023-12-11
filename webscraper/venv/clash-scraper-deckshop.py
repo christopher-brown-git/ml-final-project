@@ -59,6 +59,7 @@ for name, link in tqdm.tqdm(names_to_link.items(), total=len(names_to_link)):
     container_1 = soup.find("section", class_="mb-10")
     container_2 = container_1.find("div", class_="grid md:grid-cols-2 gap-5")
     
+    #speed 0 is for spells and buildings
     speed_to_num = {}
     speed_to_num["Slow"] = 1
     speed_to_num["Medium"] = 2
