@@ -59,6 +59,11 @@ for name, link in tqdm.tqdm(names_to_link.items(), total=len(names_to_link)):
     container_1 = soup.find("section", class_="mb-10")
     container_2 = container_1.find("div", class_="grid md:grid-cols-2 gap-5")
     
+    speed_to_num = {}
+    speed_to_num["Slow"] = 1
+    speed_to_num["Medium"] = 2
+    speed_to_num["Fast"] = 3
+    speed_to_num["Very fast"] = 4
     #special case for goblin gang, just hard code
     if name in special_names:
         goblins_soup = BeautifulSoup(requests.get("https://www.deckshop.pro/card/detail/goblins").content, "html.parser")
@@ -67,6 +72,7 @@ for name, link in tqdm.tqdm(names_to_link.items(), total=len(names_to_link)):
         stats[name]['Goblins'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
         stats[name]['SpearGoblins'] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
         stats[name]['mult'] = 3
+        stats[name]['Speed'] = 4
     else:
         #normal case
         table = container_2.find("table")
@@ -82,7 +88,7 @@ for name, link in tqdm.tqdm(names_to_link.items(), total=len(names_to_link)):
             if span_header == None:
                 other_card = c_h.find("a", href=True)
                 if other_card == None:
-                    span_headers.append(c_h.text.strip()) #Level
+                    span_headers.append("".join(c_h.text.split())) #Level
                 else:
                     span_headers.append("".join(other_card.find("img")['alt'].split()))
             else:
@@ -123,45 +129,21 @@ for name, link in tqdm.tqdm(names_to_link.items(), total=len(names_to_link)):
 
                     stats[name][stats_names[i]].append(stat)
                     stats[name]["mult"] = multiplier
-
-print(stats['GoblinGang'])
-#name -> (stats_category -> [level_1_stat, level_2_stat, etc.])
-
-# f = open("card-stats.txt", "a")
-# stats = {}
-# for name, link in tqdm.tqdm(names_to_link.items(), total=len(names_to_link)):
-#     URL = link
-#     page = requests.get(URL)
-
-#     stats[name] = {}
     
-#     #create beautiful soup object
-#     soup = BeautifulSoup(page.content, "html.parser")
-#     statistics = soup.find("div", class_="card__statistics")
-#     container = statistics.find("table", class_="card__desktopTable card__table")
-#     if container != None:
-#         rows = container.find_all("tr", class_="card__tableValues")
+        section = soup.find("section", class_="bg-gradient-to-br from-gray-body to-gray-dark px-page py-3")
+        outer_div = section.find("div", class_="grid md:grid-cols-2 gap-5")
 
-#         if rows != None:
-#             for row in rows:
+        speed_and_other_stats = outer_div.find("table")
+        
+        for row in speed_and_other_stats.find_all("tr"):
+            new_stat = "".join(row.find("th").text.split())
+            if(new_stat not in stats[name].keys()):
+                val = row.find("td").text.strip()
+                if new_stat == "Speed":
+                    stats[name][new_stat] = speed_to_num[val]
+                else:
+                    stats[name][new_stat] = float(val)
 
-#                 # category = row.find("td", class_="card__tableValue").text.strip()
-#                 if row != None:
-#                     cat_stats = row.find_all("td", class_="card__tableValue")
-#                     category = None
-
-#                     for c_s in cat_stats:
-#                         if c_s.find("img") != None:
-#                             category = c_s.text.strip()
-#                             stats[name][category] = []
-#                         else:
-#                             val = c_s.text.strip()
-#                             stats[name][category].append(val)
-
-#                     print(name, stats[name][category])
-#     # f.write(name)
-#     # f.write(stats[name])
-#     # f.write("**")
-
-# with open('stats.pkl', 'wb') as file:
-#     pickle.dump(stats, file)        
+#write dictionary of statistics to a pkl file
+with open('stats.pkl', 'wb') as file:
+    pickle.dump(stats, file)        
