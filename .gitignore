@@ -5,3 +5,4 @@ webscraper/include
 webscraper/lib
 webscraper/lib64
 webscraper/share
+webscraper/venv/.env

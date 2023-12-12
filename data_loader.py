@@ -230,6 +230,8 @@ def create_data_complex(rows_of_data, data_path):
     card_features = ['Goblins', 'FireSpirit', 'Bats', 'Skeletons', 'Barbarians', 'SpearGoblins', 'RoyalRecruits']
 
     spawners = {"Tombstone", "Furnace", "BarbarianHut", "GoblinHit", "GoblinDrill", "Graveyard"}
+
+    dps = {"Tornado", "Poison", "Earthquake"}
     
     cols_to_drop = []
     for col in df.columns:
@@ -251,26 +253,37 @@ def create_data_complex(rows_of_data, data_path):
     #outcome vector is 1 if player1 won and 2 if player2 won
 
     def handle_feature(row, feature, card, tag):
-        if feature == 'Level':
+        if feature not in new_features_map.keys():
             return
         
         new_feature = new_features_map[feature]
         #do we average the stat or sum it?
         tot = True if new_feature.split("_")[0][0] == "T" else False
 
-        if tot:
-            mult = int(stats[card]['mult'])
-            row[tag + new_feature] += int(stats[card][feature][0]) * mult #hope that avg.card.level feature will account for differences in card levels --> future work
+        mult = int(stats[card]['mult'])
+
+        if card in dps:
+            mult = int(stats[card]['Duration'])
+
+        s = ''
+        if isinstance(stats[card][feature], list):
+            s = int(stats[card][feature][0])
         else:
-            #average
-            print(feature)
-            row[tag + new_feature] += (int(stats[card][feature][0]) * mult)/8
+            s = int(stats[card][feature])
+
+        if tot:
+            row[tag + new_feature] += s * mult #hope that avg.card.level feature will account for differences in card levels --> future work
+        else:
+            if row[tag+new_feature] == 0:
+                row[tag+new_feature] = []
+            row[tag + new_feature].append((s * mult)/8)
 
     def handle_card(row, card, tag):
         for feature in stats[card].keys():
             handle_feature(row, feature, card, tag)
             
-    def add_values_outer(row, card, tag):
+    def add_values_wrapper(row, card, tag):
+        #account for spawners by accounting for each card they can potentially spawn over their lifetime
         if card in spawners:
             d = stats[card]
             lifetime = d['Lifetime']
@@ -278,10 +291,10 @@ def create_data_complex(rows_of_data, data_path):
             spawnnumber = d['SpawnNumber']
             spawnondeath = d['SpawnOnDeath']
 
-            num = (lifetime//spawnspeed) * spawnnumber + spawnondeath
+            num = int((lifetime//spawnspeed) * spawnnumber + spawnondeath)
 
             for _ in range(num):
-                handle_card(row, stats[card]['Spawn'], tag)
+                handle_card(row, stats[card]['Spawn'], tag)            
         else:
             for feature in stats[card].keys():
                 if feature in card_features:
@@ -304,11 +317,11 @@ def create_data_complex(rows_of_data, data_path):
 
             if player == "w":
                 for code in codes:
-                    card = card_dict[str(code)]
+                    card = "".join(card_dict[str(code)].split())
                     cards_in_row.add(card + '_w')
             else:
                 for code in codes:
-                    card = card_dict[str(code)]
+                    card = "".join(card_dict[str(code)].split())
                     cards_in_row.add(card + '_l')
         
         #flip coin to determine whether or not player1 is the winner or player2 is the winner
@@ -352,6 +365,8 @@ def create_data_complex(rows_of_data, data_path):
         #look at cards player_1 and player_2 each have and create features from them
         #handle 'new_features' here
         for card in card_dict.values():
+            if card == "Mirror":
+                continue
 
             card_w = card + '_w'
             card_l = card + '_l'
@@ -362,10 +377,10 @@ def create_data_complex(rows_of_data, data_path):
             if card_w in cards_in_row:
                 if winner_is_1:
                     new_row_1[card_1] = 1
-                    add_values_outer(new_row_1, card, "1_") #pass dictionaries by reference in python
+                    add_values_wrapper(new_row_1, card, "1_") #pass dictionaries by reference in python
                 else:
                     new_row_2[card_2] = 1
-                    add_values_outer(new_row_2, card, "2_") #pass dictionaries by reference in python
+                    add_values_wrapper(new_row_2, card, "2_") #pass dictionaries by reference in python
             else:
                 if winner_is_1:
                     new_row_1[card_1] = 0
@@ -375,17 +390,23 @@ def create_data_complex(rows_of_data, data_path):
             if card_l in cards_in_row:
                 if winner_is_1:
                     new_row_2[card_2] = 1
-                    add_values_outer(new_row_2, card, "2_")
+                    add_values_wrapper(new_row_2, card, "2_")
                 else:
                     new_row_1[card_1] = 1
-                    add_values_outer(new_row_1, card, "1_")
+                    add_values_wrapper(new_row_1, card, "1_")
             else:
                 if winner_is_1:
                     new_row_2[card_2] = 0
                 else:
                     new_row_1[card_1] = 0
-        
+                
         new_row_1.update(new_row_2)
+
+        for key in new_row_1.keys():
+            if "Avg" in key:
+                if isinstance(new_row_1[key], list):
+                    new_row_1[key] = sum(new_row_1[key])/len(new_row_1[key])
+        
         new_rows.append(new_row_1)
 
         #should be plenty of rows

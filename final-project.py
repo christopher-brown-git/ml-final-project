@@ -6,7 +6,7 @@ from data_loader import create_data_simple, load_data_simple, create_data_comple
 import random
 
 iterations = 1000
-rows_of_data = 10000
+rows_of_data = 100000
 
 def mean_negative_loglikelihood(Y, pYhat):
     """
@@ -533,7 +533,8 @@ def neural_network(feature_names, data):
     val_acc_1 = accuracy(data["Y_val"], mlp_1.predict(data["Xmat_val"]))
 
     f = open("net.txt", "a")
-    f.write(f"Final training accuracy: {train_acc_1:.0f}%, Validation accuracy: {val_acc_1:.0f}%")
+    f.write(str(arc) + f" Complex features, 50 epochs, " + str(rows_of_data//1000) + "k rows of data\n")
+    f.write(f"Final training accuracy: {train_acc_1:.0f}%, Validation accuracy: {val_acc_1:.0f}%\n")
     f.write("\n")
 
     random.seed(0)
@@ -542,7 +543,7 @@ def neural_network(feature_names, data):
     mlp_2.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
     train_acc_2 = accuracy(data["Y_train"], mlp_2.predict(data["Xmat_train"]))
     val_acc_2 = accuracy(data["Y_val"], mlp_2.predict(data["Xmat_val"]))
-    f.write(f"Final training accuracy: {train_acc_2:.0f}%, Validation accuracy: {val_acc_2:.0f}%")
+    f.write(f"Final training accuracy: {train_acc_2:.0f}%, Validation accuracy: {val_acc_2:.0f}%\n")
     f.close()
 
 
@@ -558,6 +559,6 @@ if __name__ == "__main__":
     if not os.path.isfile(data_path):
         create_data_complex(rows_of_data, data_path)
 
-    # feature_names, data = load_data_complex(data_path)
+    feature_names, data = load_data_complex(data_path)
 
-    # main(feature_names, data)
+    main(feature_names, data)
