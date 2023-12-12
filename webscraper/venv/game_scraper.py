@@ -54,7 +54,7 @@ def scrape_for_games(new_file_path):
 
         if i % 500 == 0 or i - 1 == len(pids):
     
-            with open(new_file_path + str(k), 'wb') as file:
+            with open(new_file_path.split(".")[0] + str(k) + ".pkl", 'wb') as file:
                 pickle.dump(games, file)
                 k += 1
 
