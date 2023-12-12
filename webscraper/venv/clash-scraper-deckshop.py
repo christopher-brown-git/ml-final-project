@@ -219,7 +219,7 @@ for name, link in tqdm.tqdm(names_to_link.items(), total=len(names_to_link)):
 # spawn speed for Graveyard and Buildings that spawn cards (Tombstone, Furnace, Golbin Hut, Barbarian Hut, Goblin Drill)
 
 stats["Graveyard"]["SpawnSpeed"] = 0.5
-stats["Graveyard"]["LifeTime"] = 9.5
+stats["Graveyard"]["Lifetime"] = 9.5
 stats["Graveyard"]["SpawnOnDeath"] = 0
 stats["Graveyard"]["SpawnNumber"] = 1
 stats["Graveyard"]["Spawn"] = "Skeletons"
@@ -257,7 +257,6 @@ stats["GoblinDrill"]["Lifetime"] = 9
 stats["GoblinDrill"]["SpawnOnDeath"] = 2
 stats["GoblinDrill"]["SpawnNumber"] = 1
 stats["GoblinDrill"]["Spawn"] = "Goblins"
-
 
 f = open("stats.txt", "a")
 
