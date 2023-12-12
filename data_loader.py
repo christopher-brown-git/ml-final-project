@@ -29,7 +29,7 @@ def create_data_simple(rows_of_data, data_path):
     #save resulting dataframe into a csv file
 
 
-    #dictionary mapping from card codes to card names
+    #dictionary mapping from card code -> (card name, elixir)
     card_dict = {}
 
     #open csv containing the mapping between card codes and card names
@@ -175,15 +175,13 @@ def create_data_complex(rows_of_data, data_path):
     paths_to_files = []
     directory = "data"
 
-    card_list_path = ""
+    card_list_path = 
 
     for name in os.scandir(directory):
         if name.is_dir():
             for obj in os.scandir(name):
                 if obj.is_file():
                     paths_to_files.append(obj.path)
-        elif name.is_file and name.path.split('/')[1] == 'CardMasterListSeason18_12082020.csv':
-            card_list_path = name.path
 
     #APPROACH
     #drop unneccessary columns
