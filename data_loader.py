@@ -175,8 +175,6 @@ def create_data_complex(rows_of_data, data_path):
     paths_to_files = []
     directory = "data"
 
-    card_list_path = 
-
     for name in os.scandir(directory):
         if name.is_dir():
             for obj in os.scandir(name):
@@ -190,24 +188,9 @@ def create_data_complex(rows_of_data, data_path):
 
 
     #dictionary mapping from card codes to card names
-    card_dict = {}
-
-    #open csv containing the mapping between card codes and card names
-    card_list_file = open(card_list_path, 'r')
-
-    #create mapping from card codes to card names
-    for num, line in enumerate(card_list_file):
-        #skip first line of file
-        if num == 0:
-            continue
-
-        arr = line.split(',')
-        card_code = arr[0]
-        card_name = arr[1].split('\n')[0]
-        
-        card_dict[card_code] = card_name
-
-    card_list_file.close()
+    card_dict = ''
+    with open('webscraper/venv/card_dict.pkl', 'rb') as file:
+        card_dict = pickle.load(file)
 
     #read in dataframe
     df = pd.read_csv(paths_to_files[0])
@@ -315,11 +298,11 @@ def create_data_complex(rows_of_data, data_path):
 
             if player == "w":
                 for code in codes:
-                    card = "".join(card_dict[str(code)].split())
+                    card = "".join(card_dict[code][0].split())
                     cards_in_row.add(card + '_w')
             else:
                 for code in codes:
-                    card = "".join(card_dict[str(code)].split())
+                    card = "".join(card_dict[code][0].split())
                     cards_in_row.add(card + '_l')
         
         #flip coin to determine whether or not player1 is the winner or player2 is the winner
@@ -362,7 +345,7 @@ def create_data_complex(rows_of_data, data_path):
 
         #look at cards player_1 and player_2 each have and create features from them
         #handle 'new_features' here
-        for card in card_dict.values():
+        for (card, elixirCost) in card_dict.values():
             if card == "Mirror":
                 continue
 
