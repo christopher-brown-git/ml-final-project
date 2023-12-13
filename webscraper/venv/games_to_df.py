@@ -86,12 +86,10 @@ card_features = ['Goblins', 'FireSpirit', 'Bats', 'Skeletons', 'Barbarians', 'Sp
 
 dps = {"Tornado", "Poison", "Earthquake"}
 
-total_features_map = {"Healing": "Tot_Healing", "Hitpoints" : "Tot_Hitpoints", "Tower damage": "Tot_Towerdamage",
-                    "Death damage": "Tot_Deathdamage", "Damage": "Tot_Damage",
-                    "Shield": "Tot_Shield", "Building damage": "Tot_Buildingdamage"}
-
-average_features_map = {"Hitspeed": "Avg_Hitspeed", "Spell radius": "Avg_Spellradius", "Range": "Avg_Range",
-                        "Speed": "Avg_Speed"}
+other_features_map = {"Healing": "Tot_Healing", "Hitpoints" : "Tot_Hitpoints", "Tower damage": "Tot_Towerdamage",
+                    "Death damage": "Tot_Deathdamage", "Damage": "Tot_Damage", "Shield": "Tot_Shield", 
+                    "Building damage": "Tot_Buildingdamage", "Hitspeed": "Avg_Hitspeed", "Spell radius": "Avg_Spellradius", 
+                    "Range": "Avg_Range", "Speed": "Avg_Speed"}
 
 def convert():
     if not exists(path):
@@ -113,6 +111,7 @@ def convert():
         card_dict = pickle.load(file)
     
     new_rows = []
+    out_vec = []
 
     for (key, info) in games_dict.items():
         #until the end the first few columns is me, and the last few columns is opponent
@@ -155,10 +154,10 @@ def convert():
             r['total_card_level_count'] = 0
             r['troop_count'] = 0
 
-            for f in total_features_map.values():
+            for f in other_features_map.values():
                 r[f] = 0
             
-            for f in average_features_map.values():
+            for f in other_features_map.values():
                 r[f] = 0
 
         for (card_name, elixir_cost) in card_dict.values():
@@ -196,28 +195,21 @@ def convert():
                 
                 new_row_1["total_card_level_count"] += level_me
 
-                #go through features that accumulate (total)
-                for feature in total_features_map.values():
-                    if feature in stats[card_name].keys():
-                        if isinstance(stats[card_name][feature], list):
-                            index = level_me - stats[card_name]['Level'][0]
-                            mult = stats[card_name]['mult']
-                            new_row_1[feature] += stats[card_name][feature][index]*mult
-                        else:
-                            new_row_1[feature] += stats[card_name][feature]*mult
-                
-                #go through features that average
-                for feature in average_features_map.values():
-                    if feature in stats[card_name].keys():
-                        if new_row_1[feature] == 0:
-                            new_row_1[feature] = []
+                #go through other features:
+                #if one of these features is a list, it should be accumulated
+                #if it is a value, it should be averaged
 
+                for feature in other_features_map.keys():
+                    actual_feature = other_features_map[feature]
+                    if feature in stats[card_name].keys():
+                        mult = stats[card_name]['mult']
                         if isinstance(stats[card_name][feature], list):
                             index = level_me - stats[card_name]['Level'][0]
-                            mult = stats[card_name]['mult']
-                            new_row_1[feature].append(stats[card_name][feature][index]*mult)
+                            new_row_1[actual_feature] += stats[card_name][feature][index]*mult
                         else:
-                            new_row_1[feature].append(stats[card_name][feature]*mult)
+                            if new_row_1[actual_feature] == 0:
+                                new_row_1[actual_feature] = []
+                            new_row_1[actual_feature].append(stats[card_name][feature]*mult)
 
                 #special case for spawners: just add the stats for all the troops the produce over their lifetime
                 if card_name in spawners:
@@ -232,92 +224,174 @@ def convert():
                     for _ in range(0, num):
                         spawn = stats[card_name]['Spawn']
                         for feature in stats[spawn]:
-                            if feature in total_features_map.values():
+                            #do not consider categorical features here
+                            if feature in other_features_map.values():
                                 if isinstance(stats[card_name][feature], list):
                                     #all spawners produce cards that are the same level as they are themselves
                                     index = level_me - stats[card_name]['Level'][0]
                                     mult = stats[card_name]['mult']
                                     new_row_1[feature] += stats[card_name][feature][index]*mult
                                 else:
-                                    new_row_1[feature] += stats[card_name][feature]*mult
+                                    if new_row_1[feature] == 0:
+                                        new_row_1[feature] = []
+                                    new_row_1[feature].append(stats[card_name][feature]*mult)
                 
                 #last special case
                 if card_name == "Goblin Gang":
                         #go through features that accumulate (total)
                     for feature in stats["Goblins"].keys():
-
+                        #do not consider categorical features here
+                        if feature in other_features_map.values():
+                            if isinstance(stats[card_name][feature], list):
+                                #all spawners produce cards that are the same level as they are themselves
+                                index = level_me - stats[card_name]['Level'][0]
+                                mult = stats[card_name]['mult']
+                                new_row_1[feature] += stats[card_name][feature][index]*mult
+                            else:
+                                if new_row_1[feature] == 0:
+                                    new_row_1[feature] = []
+                                new_row_1[feature].append(stats[card_name][feature]*mult)
                     
                     for feature in stats["Spear Goblins"].keys():
-                        
-
+                        #do not consider categorical features here
+                        if feature in other_features_map.values():
+                            if isinstance(stats[card_name][feature], list):
+                                #all spawners produce cards that are the same level as they are themselves
+                                index = level_me - stats[card_name]['Level'][0]
+                                mult = stats[card_name]['mult']
+                                new_row_1[feature] += stats[card_name][feature][index]*mult
+                            else:
+                                if new_row_1[feature] == 0:
+                                    new_row_1[feature] = []
+                                new_row_1[feature].append(stats[card_name][feature]*mult)
             else:
                 new_row_1[card_name] = 0
             
-
-            #OPPONENT/ROW 2
+            
+            #OPP/ROW 2
             level_opp = cards_opp[card_name]
+
             if card_name in cards_opp.keys():
                 new_row_2[card_name] = 1
                 new_row_2[elixir_cost] += elixir_cost
+                
+                #handle counts
+                for category in [common, rare, epic, legendary, champions, spells, 
+                                 structures, spawners, melee_short, melee_medium, melee_long, ranged, air, ground,
+                                 defensive_buildings, siege_buildings]:
+                    
+                    if card_name in category[1]:
+                        new_row_2[category[0]] += 1
+                    
+                if card_name not in structures and card_name not in spells:
+                    new_row_2["troop_count"] += 1
+                
+                new_row_2["total_card_level_count"] += level_opp
+
+                #go through other features:
+                #if one of these features is a list, it should be accumulated
+                #if it is a value, it should be averaged
+
+                for feature in other_features_map.keys():
+                    actual_feature = other_features_map[feature]
+                    if feature in stats[card_name].keys():
+                        mult = stats[card_name]['mult']
+                        if isinstance(stats[card_name][feature], list):
+                            index = level_opp - stats[card_name]['Level'][0]
+                            new_row_2[actual_feature] += stats[card_name][feature][index]*mult
+                        else:
+                            if new_row_2[actual_feature] == 0:
+                                new_row_2[actual_feature] = []
+                            new_row_2[actual_feature].append(stats[card_name][feature]*mult)
+
+                #special case for spawners: just add the stats for all the troops the produce over their lifetime
+                if card_name in spawners:
+                    d = stats[card_name]
+                    lifetime = d['Lifetime']
+                    spawnspeed = d['SpawnSpeed']
+                    spawnnumber = d['SpawnNumber']
+                    spawnondeath = d['SpawnOnDeath']
+
+                    num = int((lifetime//spawnspeed) * spawnnumber + spawnondeath)
+
+                    for _ in range(0, num):
+                        spawn = stats[card_name]['Spawn']
+                        for feature in stats[spawn]:
+                            #do not consider categorical features here
+                            if feature in other_features_map.values():
+                                if isinstance(stats[card_name][feature], list):
+                                    #all spawners produce cards that are the same level as they are themselves
+                                    index = level_opp - stats[card_name]['Level'][0]
+                                    mult = stats[card_name]['mult']
+                                    new_row_2[feature] += stats[card_name][feature][index]*mult
+                                else:
+                                    if new_row_2[feature] == 0:
+                                        new_row_2[feature] = []
+                                    new_row_2[feature].append(stats[card_name][feature]*mult)
+                
+                #last special case
+                if card_name == "Goblin Gang":
+                        #go through features that accumulate (total)
+                    for feature in stats["Goblins"].keys():
+                        #do not consider categorical features here
+                        if feature in other_features_map.values():
+                            if isinstance(stats[card_name][feature], list):
+                                #all spawners produce cards that are the same level as they are themselves
+                                index = level_opp - stats[card_name]['Level'][0]
+                                mult = stats[card_name]['mult']
+                                new_row_2[feature] += stats[card_name][feature][index]*mult
+                            else:
+                                if new_row_2[feature] == 0:
+                                    new_row_2[feature] = []
+                                new_row_2[feature].append(stats[card_name][feature]*mult)
+                    
+                    for feature in stats["Spear Goblins"].keys():
+                        #do not consider categorical features here
+                        if feature in other_features_map.values():
+                            if isinstance(stats[card_name][feature], list):
+                                #all spawners produce cards that are the same level as they are themselves
+                                index = level_opp - stats[card_name]['Level'][0]
+                                mult = stats[card_name]['mult']
+                                new_row_2[feature] += stats[card_name][feature][index]*mult
+                            else:
+                                if new_row_2[feature] == 0:
+                                    new_row_2[feature] = []
+                                new_row_2[feature].append(stats[card_name][feature]*mult)
             else:
                 new_row_2[card_name] = 0
             
-            
-
-        for r in [new_row_1, new_row_2]:
-            for feature in r.keys():
-                if isinstance(r[feature], list):
-                    r[feature] = sum(r[feature])/len(r[feature])
-
 
             
-            if card_w in cards_in_row:
-                if first_is_me:
-                    new_row_1[card_1] = 1
-                    add_values_wrapper(new_row_1, card, "1_") #pass dictionaries by reference in python
-                else:
-                    new_row_2[card_2] = 1
-                    add_values_wrapper(new_row_2, card, "2_") #pass dictionaries by reference in python
-            else:
-                if first_is_me:
-                    new_row_1[card_1] = 0
-                else:
-                    new_row_2[card_2] = 0
-            
-            if card_l in cards_in_row:
-                if first_is_me:
-                    new_row_2[card_2] = 1
-                    add_values_wrapper(new_row_2, card, "2_")
-                else:
-                    new_row_1[card_1] = 1
-                    add_values_wrapper(new_row_1, card, "1_")
-            else:
-                if first_is_me:
-                    new_row_2[card_2] = 0
-                else:
-                    new_row_1[card_1] = 0
         
         me_comes_first = 0
         if np.random.rand() > 0.5:
             me_comes_first = 1
 
-        if me_comes_first        
-        new_row_1["Y"] = info["winner"]
-
-        new_row_1.update(new_row_2)
-
-        for key in new_row_1.keys():
-            if "Avg" in key:
-                if isinstance(new_row_1[key], list):
-                    new_row_1[key] = sum(new_row_1[key])/len(new_row_1[key])
-        
+        #outcome is 1 if first player wins and 0 if they lose
+        if me_comes_first:
+            new_row_1.update(new_row_2)
+            new_rows.append(new_row_1)
+            if info["winner"] == 1:
+                #I won and I come first
+                out_vec.append(1)
+            else:
+                #I lost and I come first
+                out_vec.append(0)
+        else:
+            new_row_2.update(new_row_1)
+            new_rows.append(new_row_2)
+            if info["winner"] == 1:
+                #I won and I come second, so first player lost
+                out_vec.append(0)
+            else:
+                #I lost and I come second, so first player won
+                out_vec.append(1)
+                
         new_rows.append(new_row_1)
 
         #should be plenty of rows
         if index >= rows_of_data:
             break
-
-
 
 if __name__ == "__main__":
     convert()
