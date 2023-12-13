@@ -126,14 +126,23 @@ def create_stats():
                     else:
                         mirror_or_elite = col.find("span", class_="hidden sm:inline")
                         if mirror_or_elite and mirror_or_elite.text in {"(Mirrored)", "(Elite level)"}:
+                            tds = row.find_all("td")
+                            #difference between first and last td
+                            for td in tds:
+                                if td.find("span"):
+                                    pass
+                                else:
+                                    pass
                             break
+                            
+                        else:
+                            info = col.text.strip().split()
 
-                        info = col.text.strip().split()
-                        stat = int(info[0])
-                        multiplier = int(info[1][1:])
+                            stat = int(info[0])
+                            multiplier = int(info[1][1:])
 
-                        stats[name][stats_names[i]].append(stat)
-                        stats[name]["mult"] = multiplier
+                            stats[name][stats_names[i]].append(stat)
+                            stats[name]["mult"] = multiplier
         
             section = soup.find("section", class_="bg-gradient-to-br from-gray-body to-gray-dark px-page py-3")
             outer_div = section.find("div", class_="grid md:grid-cols-2 gap-5")
@@ -193,7 +202,7 @@ def create_stats():
     stats["Goblin Drill"]["Spawn Number"] = 1
     stats["Goblin Drill"]["Spawn"] = "Goblins"
 
-    f = open("stats.txt", "a")
+    f = open("stats1.txt", "a")
 
     unique_stats = set()
     for name in stats.keys():
@@ -206,12 +215,12 @@ def create_stats():
 
 
     #write dictionary of statistics to a pkl file
-    with open('stats.pkl', 'wb') as file:
+    with open('stats1.pkl', 'wb') as file:
         pickle.dump(stats, file)
 
 
 if __name__ == "__main__":
-    if exists("stats.pkl") or exists("stats.txt"):
+    if exists("stats1.pkl") or exists("stats1.txt"):
         print("stats.pkl or stats.txt already exists!")
     else:
         create_stats()    

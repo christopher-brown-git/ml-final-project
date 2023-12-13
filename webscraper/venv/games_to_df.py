@@ -91,6 +91,163 @@ other_features_map = {"Healing": "Tot_Healing", "Hitpoints" : "Tot_Hitpoints", "
                     "Building damage": "Tot_Buildingdamage", "Hitspeed": "Avg_Hitspeed", "Spell radius": "Avg_Spellradius", 
                     "Range": "Avg_Range", "Speed": "Avg_Speed"}
 
+def create_features(stats, card_dict, info, card_name, elixir_cost, row, player):
+    cards_in_hand = {}
+
+    #card_dict: id -> (name, elixirCost)
+    for (id, level) in info[player]:
+        card_name = card_dict[int(id)][0] #FIX ERRORS LIKE THESE
+        cards_in_hand[card_name] = int(level)
+    
+    for (id, level) in info["opp"]:
+        card_name = card_dict[int(id)][0]
+        cards_in_hand[card_name] = int(level)
+
+    row['elixir_cost'] = 0
+
+    row['common_count'] = 0
+    row['rare_count'] = 0
+    row['epic_count'] = 0
+    row['legendary_count'] = 0
+    row['champion_count'] = 0
+    row['spell_count'] = 0
+    row['structure_count'] = 0
+    row['spawner_count'] = 0
+    row['melee_short_count'] = 0
+    row['melee_medium_count'] = 0
+    row['melee_long_count'] = 0
+    row['ranged_count'] = 0
+    row['air_count'] = 0
+    row['ground_count'] = 0
+    row['defensive_building_count'] = 0
+    row['siege_building_count'] = 0
+    row['total_card_level_count'] = 0
+    row['troop_count'] = 0
+
+    for f in other_features_map.values():
+        row[f] = 0
+    
+    for f in other_features_map.values():
+        row[f] = 0
+
+    #ignore mirror for now
+    if card_name == "Mirror":
+        if card_name in cards_in_hand.keys():
+            row[card_name] = 1
+        else:
+            row[card_name] = 0
+
+        return
+
+    #ignore warmth except for elixir count
+    if card_name == "Warmth":
+        if card_name in cards_in_hand.keys():
+            row[card_name] = 1
+            row['elixir_cost'] += elixir_cost
+        else:
+            row[card_name] = 0
+          
+        return
+    
+    #ME/ROW 1
+
+
+    if card_name in cards_in_hand.keys():
+        level = cards_in_hand[card_name]
+        row[card_name] = 1
+        row['elixir_cost'] += elixir_cost
+        
+        #handle counts
+        for category in [common, rare, epic, legendary, champions, spells, 
+                        structures, spawners, melee_short, melee_medium, melee_long, ranged, air, ground,
+                        defensive_buildings, siege_buildings]:
+            
+            if card_name in category[1]:
+                row[category[0]] += 1
+            
+        if card_name not in structures and card_name not in spells:
+            row["troop_count"] += 1
+        
+        row["total_card_level_count"] += level
+
+        #go through other features:
+        #if one of these features is a list, it should be accumulated
+        #if it is a value, it should be averaged
+
+        for feature in other_features_map.keys():
+            actual_feature = other_features_map[feature]
+            if feature in stats[card_name].keys():
+                mult = int(stats[card_name]['mult'])
+
+                if isinstance(stats[card_name][feature], list):
+                    index = level - int(stats[card_name]['Level'][0])
+                    print(feature, card_name, level, int(stats[card_name]['Level'][0]), index)
+                    row[actual_feature] += int(stats[card_name][feature][index])*mult
+                else:
+                    if row[actual_feature] == 0:
+                        row[actual_feature] = []
+                    row[actual_feature].append(int(stats[card_name][feature])*mult)
+
+        #special case for spawners: just add the stats for all the troops the produce over their lifetime
+        if card_name in spawners:
+            d = stats[card_name]
+            lifetime = int(d['Lifetime'])
+            spawnspeed = int(d['SpawnSpeed'])
+            spawnnumber = int(d['SpawnNumber'])
+            spawnondeath = int(d['SpawnOnDeath'])
+
+            num = int((lifetime//spawnspeed) * spawnnumber + spawnondeath)
+
+            for _ in range(0, num):
+                spawn = stats[card_name]['Spawn']
+                for feature in stats[spawn]:
+                    #do not consider categorical features here
+                    if feature in other_features_map.values():
+                        mult = int(stats[card_name]['mult'])
+
+                        if isinstance(stats[card_name][feature], list):
+                            #all spawners produce cards that are the same level as they are themselves
+                            index = level - int(stats[card_name]['Level'][0])
+                            row[feature] += int(stats[card_name][feature][index])*mult
+                        else:
+                            if row[feature] == 0:
+                                row[feature] = []
+                            row[feature].append(int(stats[card_name][feature])*mult)
+        
+        #last special case
+        if card_name == "Goblin Gang":
+                #go through features that accumulate (total)
+            for feature in stats["Goblins"].keys():
+                #do not consider categorical features here
+                if feature in other_features_map.values():
+                    mult = int(stats[card_name]['mult'])
+
+                    if isinstance(stats[card_name][feature], list):
+                        #all spawners produce cards that are the same level as they are themselves
+                        index = level - int(stats[card_name]['Level'][0])
+                        row[feature] += int(stats[card_name][feature][index])*mult
+                    else:
+                        if row[feature] == 0:
+                            row[feature] = []
+                        row[feature].append(int(stats[card_name][feature])*mult)
+            
+            for feature in stats["Spear Goblins"].keys():
+                #do not consider categorical features here
+                if feature in other_features_map.values():
+                    mult = int(stats[card_name]['mult'])
+
+                    if isinstance(stats[card_name][feature], list):
+                        #all spawners produce cards that are the same level as they are themselves
+                        index = level - int(stats[card_name]['Level'][0])
+                        
+                        row[feature] += int(stats[card_name][feature][index])*mult
+                    else:
+                        if row[feature] == 0:
+                            row[feature] = []
+                        row[feature].append(int(stats[card_name][feature])*mult)
+    else:
+        row[card_name] = 0
+
 def convert(rows_of_data, data_path):
     if not exists(path):
         game_scraper()
@@ -121,246 +278,11 @@ def convert(rows_of_data, data_path):
         new_row_1 = {}
         new_row_2 = {}
 
-        cards_me = {}
-        cards_opp = {}
-
-        for (id, level) in info["me"]:
-            card_name = card_dict[id][0] #FIX ERRORS LIKE THESE
-            cards_me[card_name] = level
-        
-        for (id, level) in info["opp"]:
-            card_name = card_dict[id][0]
-            cards_opp[card_name] = level
-
-        for r in [new_row_1, new_row_2]:
-            r["elixir_cost"] = 0
-
-            r["common_count"] = 0
-            r['rare_count'] = 0
-            r['epic_count'] = 0
-            r['legendary_count'] = 0
-            r['champion_count'] = 0
-            r['spell_count'] = 0
-            r['structure_count'] = 0
-            r['spawner_count'] = 0
-            r['melee_short_count'] = 0
-            r['melee_medium_count'] = 0
-            r['melee_long_count'] = 0
-            r['ranged_count'] = 0
-            r['air_count'] = 0
-            r['ground_count'] = 0
-            r['defensive_building_count'] = 0
-            r['siege_building_count'] = 0
-            r['total_card_level_count'] = 0
-            r['troop_count'] = 0
-
-            for f in other_features_map.values():
-                r[f] = 0
-            
-            for f in other_features_map.values():
-                r[f] = 0
 
         for (card_id, (card_name, elixir_cost)) in card_dict.items():
-            #ignore mirror for now
-            if card_name == "Mirror":
-                if card_name in cards_me.keys():
-                    new_row_1[card_name] = 1
-                else:
-                    new_row_1[card_name] = 0
-                
-                if card_name in cards_opp.keys():
-                    new_row_2[card_name] = 1
-                else:
-                    new_row_2[card_name] = 1
-                
-                continue
-            
-            #ME/ROW 1
+            create_features(stats, card_dict, info, card_name, elixir_cost, new_row_1, "me")
+            create_features(stats, card_dict, info, card_name, elixir_cost, new_row_2, "opp")
 
-            if card_name in cards_me.keys():
-                level_me = cards_me[card_name]
-                new_row_1[card_name] = 1
-                new_row_1[elixir_cost] += elixir_cost
-                
-                #handle counts
-                for category in [common, rare, epic, legendary, champions, spells, 
-                                 structures, spawners, melee_short, melee_medium, melee_long, ranged, air, ground,
-                                 defensive_buildings, siege_buildings]:
-                    
-                    if card_name in category[1]:
-                        new_row_1[category[0]] += 1
-                    
-                if card_name not in structures and card_name not in spells:
-                    new_row_1["troop_count"] += 1
-                
-                new_row_1["total_card_level_count"] += level_me
-
-                #go through other features:
-                #if one of these features is a list, it should be accumulated
-                #if it is a value, it should be averaged
-
-                for feature in other_features_map.keys():
-                    actual_feature = other_features_map[feature]
-                    if feature in stats[card_name].keys():
-                        mult = stats[card_name]['mult']
-                        if isinstance(stats[card_name][feature], list):
-                            index = level_me - stats[card_name]['Level'][0]
-                            new_row_1[actual_feature] += stats[card_name][feature][index]*mult
-                        else:
-                            if new_row_1[actual_feature] == 0:
-                                new_row_1[actual_feature] = []
-                            new_row_1[actual_feature].append(stats[card_name][feature]*mult)
-
-                #special case for spawners: just add the stats for all the troops the produce over their lifetime
-                if card_name in spawners:
-                    d = stats[card_name]
-                    lifetime = d['Lifetime']
-                    spawnspeed = d['SpawnSpeed']
-                    spawnnumber = d['SpawnNumber']
-                    spawnondeath = d['SpawnOnDeath']
-
-                    num = int((lifetime//spawnspeed) * spawnnumber + spawnondeath)
-
-                    for _ in range(0, num):
-                        spawn = stats[card_name]['Spawn']
-                        for feature in stats[spawn]:
-                            #do not consider categorical features here
-                            if feature in other_features_map.values():
-                                if isinstance(stats[card_name][feature], list):
-                                    #all spawners produce cards that are the same level as they are themselves
-                                    index = level_me - stats[card_name]['Level'][0]
-                                    mult = stats[card_name]['mult']
-                                    new_row_1[feature] += stats[card_name][feature][index]*mult
-                                else:
-                                    if new_row_1[feature] == 0:
-                                        new_row_1[feature] = []
-                                    new_row_1[feature].append(stats[card_name][feature]*mult)
-                
-                #last special case
-                if card_name == "Goblin Gang":
-                        #go through features that accumulate (total)
-                    for feature in stats["Goblins"].keys():
-                        #do not consider categorical features here
-                        if feature in other_features_map.values():
-                            if isinstance(stats[card_name][feature], list):
-                                #all spawners produce cards that are the same level as they are themselves
-                                index = level_me - stats[card_name]['Level'][0]
-                                mult = stats[card_name]['mult']
-                                new_row_1[feature] += stats[card_name][feature][index]*mult
-                            else:
-                                if new_row_1[feature] == 0:
-                                    new_row_1[feature] = []
-                                new_row_1[feature].append(stats[card_name][feature]*mult)
-                    
-                    for feature in stats["Spear Goblins"].keys():
-                        #do not consider categorical features here
-                        if feature in other_features_map.values():
-                            if isinstance(stats[card_name][feature], list):
-                                #all spawners produce cards that are the same level as they are themselves
-                                index = level_me - stats[card_name]['Level'][0]
-                                mult = stats[card_name]['mult']
-                                new_row_1[feature] += stats[card_name][feature][index]*mult
-                            else:
-                                if new_row_1[feature] == 0:
-                                    new_row_1[feature] = []
-                                new_row_1[feature].append(stats[card_name][feature]*mult)
-            else:
-                new_row_1[card_name] = 0
-            
-            
-            #OPP/ROW 2
-            if card_name in cards_opp.keys():
-                level_opp = cards_opp[card_name]
-                new_row_2[card_name] = 1
-                new_row_2[elixir_cost] += elixir_cost
-                
-                #handle counts
-                for category in [common, rare, epic, legendary, champions, spells, 
-                                 structures, spawners, melee_short, melee_medium, melee_long, ranged, air, ground,
-                                 defensive_buildings, siege_buildings]:
-                    
-                    if card_name in category[1]:
-                        new_row_2[category[0]] += 1
-                    
-                if card_name not in structures and card_name not in spells:
-                    new_row_2["troop_count"] += 1
-                
-                new_row_2["total_card_level_count"] += level_opp
-
-                #go through other features:
-                #if one of these features is a list, it should be accumulated
-                #if it is a value, it should be averaged
-
-                for feature in other_features_map.keys():
-                    actual_feature = other_features_map[feature]
-                    if feature in stats[card_name].keys():
-                        mult = stats[card_name]['mult']
-                        if isinstance(stats[card_name][feature], list):
-                            index = level_opp - stats[card_name]['Level'][0]
-                            new_row_2[actual_feature] += stats[card_name][feature][index]*mult
-                        else:
-                            if new_row_2[actual_feature] == 0:
-                                new_row_2[actual_feature] = []
-                            new_row_2[actual_feature].append(stats[card_name][feature]*mult)
-
-                #special case for spawners: just add the stats for all the troops the produce over their lifetime
-                if card_name in spawners:
-                    d = stats[card_name]
-                    lifetime = d['Lifetime']
-                    spawnspeed = d['SpawnSpeed']
-                    spawnnumber = d['SpawnNumber']
-                    spawnondeath = d['SpawnOnDeath']
-
-                    num = int((lifetime//spawnspeed) * spawnnumber + spawnondeath)
-
-                    for _ in range(0, num):
-                        spawn = stats[card_name]['Spawn']
-                        for feature in stats[spawn]:
-                            #do not consider categorical features here
-                            if feature in other_features_map.values():
-                                if isinstance(stats[card_name][feature], list):
-                                    #all spawners produce cards that are the same level as they are themselves
-                                    index = level_opp - stats[card_name]['Level'][0]
-                                    mult = stats[card_name]['mult']
-                                    new_row_2[feature] += stats[card_name][feature][index]*mult
-                                else:
-                                    if new_row_2[feature] == 0:
-                                        new_row_2[feature] = []
-                                    new_row_2[feature].append(stats[card_name][feature]*mult)
-                
-                #last special case
-                if card_name == "Goblin Gang":
-                        #go through features that accumulate (total)
-                    for feature in stats["Goblins"].keys():
-                        #do not consider categorical features here
-                        if feature in other_features_map.values():
-                            if isinstance(stats[card_name][feature], list):
-                                #all spawners produce cards that are the same level as they are themselves
-                                index = level_opp - stats[card_name]['Level'][0]
-                                mult = stats[card_name]['mult']
-                                new_row_2[feature] += stats[card_name][feature][index]*mult
-                            else:
-                                if new_row_2[feature] == 0:
-                                    new_row_2[feature] = []
-                                new_row_2[feature].append(stats[card_name][feature]*mult)
-                    
-                    for feature in stats["Spear Goblins"].keys():
-                        #do not consider categorical features here
-                        if feature in other_features_map.values():
-                            if isinstance(stats[card_name][feature], list):
-                                #all spawners produce cards that are the same level as they are themselves
-                                index = level_opp - stats[card_name]['Level'][0]
-                                mult = stats[card_name]['mult']
-                                new_row_2[feature] += stats[card_name][feature][index]*mult
-                            else:
-                                if new_row_2[feature] == 0:
-                                    new_row_2[feature] = []
-                                new_row_2[feature].append(stats[card_name][feature]*mult)
-            else:
-                new_row_2[card_name] = 0
-            
-
-            
         
         me_comes_first = 0
         if np.random.rand() > 0.5:

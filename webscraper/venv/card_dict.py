@@ -23,7 +23,7 @@ def create_card_dict():
     res = r.json()
 
     for item in res["items"]:
-        card_dict[item["id"]] = (item["name"], item["elixirCost"])
+        card_dict[int(item["id"])] = (item["name"], int(item["elixirCost"]))
 
     #add warmth
     card_dict[28000021] = ("Warmth", 1)
