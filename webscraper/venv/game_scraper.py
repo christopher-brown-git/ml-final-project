@@ -1,7 +1,6 @@
 import requests
 import json
 import tqdm
-from dotenv import dotenv_values
 import pickle
 from os.path import exists
 import pid_scraper
@@ -19,8 +18,7 @@ def scrape_for_games(new_file_path):
     with open('pids.pkl', 'rb') as file:
         pids = pickle.load(file)
 
-    config = dotenv_values(".env")
-    apikey = config["APIKEY"]
+    apikey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjJjNDVhNWM1LTM2NDctNDFjZC05MTUwLTgzZDI4YmUxYzQzMyIsImlhdCI6MTcwMjQxMTY2Nywic3ViIjoiZGV2ZWxvcGVyL2NmNWJjOTAyLWFlNWEtMjM5OC0zNDkwLWVlZDkyOWEyYzNmYiIsInNjb3BlcyI6WyJyb3lhbGUiXSwibGltaXRzIjpbeyJ0aWVyIjoiZGV2ZWxvcGVyL3NpbHZlciIsInR5cGUiOiJ0aHJvdHRsaW5nIn0seyJjaWRycyI6WyIxMzcuMTY1LjguMTAiLCIxMzcuMTY1LjEwNi4xMjYiXSwidHlwZSI6ImNsaWVudCJ9XX0.ufbPS9wibWsaEIvCy2e8tRTNH-yj1FKAxWiyHJfRipPz7GN0PzFw8IOrDpMP3viBTcZ4g2J4lxCisLn3ds0GOA"
 
     games = {}
 

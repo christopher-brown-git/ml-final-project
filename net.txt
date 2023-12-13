@@ -25,3 +25,11 @@ Final training accuracy: 50%, Validation accuracy: 50%
 Final training accuracy: 50%, Validation accuracy: 51%
 
 Final training accuracy: 50%, Validation accuracy: 49%
+
+[8, 4, 1] Complex features, 50 epochs, complex.csv (roughly 110,000 games)
+Final training accuracy: 50%, Validation accuracy: 50% 30 it/s
+Final training accuracy: 50%, Validation accuracy: 50% 30 it/s
+
+[4, 5, 2, 7, 3, 2, 1] Complex features, 50 epochs, complex.csv (roughly 110,000 games)
+Final training accuracy: 50%, Validation accuracy: 50%
+Final training accuracy: 50%, Validation accuracy: 50%

@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 import pickle
 from os.path import exists
 import json
-from dotenv import dotenv_values
 
 def scrape():
     #FIRST GET TOP 100 CLAN IDS FROM DECKSHOP.PRO
@@ -36,8 +35,7 @@ def scrape():
 
     #GET NAMES OF MEMBERS IN CLANS USING CLASH ROYALE API
 
-    config = dotenv_values(".env")
-    apikey = config["APIKEY"]
+    apikey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjJjNDVhNWM1LTM2NDctNDFjZC05MTUwLTgzZDI4YmUxYzQzMyIsImlhdCI6MTcwMjQxMTY2Nywic3ViIjoiZGV2ZWxvcGVyL2NmNWJjOTAyLWFlNWEtMjM5OC0zNDkwLWVlZDkyOWEyYzNmYiIsInNjb3BlcyI6WyJyb3lhbGUiXSwibGltaXRzIjpbeyJ0aWVyIjoiZGV2ZWxvcGVyL3NpbHZlciIsInR5cGUiOiJ0aHJvdHRsaW5nIn0seyJjaWRycyI6WyIxMzcuMTY1LjguMTAiLCIxMzcuMTY1LjEwNi4xMjYiXSwidHlwZSI6ImNsaWVudCJ9XX0.ufbPS9wibWsaEIvCy2e8tRTNH-yj1FKAxWiyHJfRipPz7GN0PzFw8IOrDpMP3viBTcZ4g2J4lxCisLn3ds0GOA"
 
     #me = VC2L0QPC
     pids = []

@@ -526,15 +526,15 @@ def neural_network(feature_names, data):
 
     #neural net with no dropout
     random.seed(42)
-    arc = [4, 5, 2, 7, 3, 2, 1]
+    arc = [20, 10, 1]
     mlp_1 = MLP(n_features=d, layer_sizes=arc, learning_rate=0.05, dropout_proba=0.0)
     mlp_1.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
     train_acc_1 = accuracy(data["Y_train"], mlp_1.predict(data["Xmat_train"]))
     val_acc_1 = accuracy(data["Y_val"], mlp_1.predict(data["Xmat_val"]))
 
     f = open("net.txt", "a")
-    f.write(str(arc) + f" Complex features, 50 epochs, " + str(rows_of_data//1000) + "k rows of data\n")
-    f.write(f"Final training accuracy: {train_acc_1:.0f}%, Validation accuracy: {val_acc_1:.0f}%\n")
+    f.write(str(arc) + f" Complex features, 50 epochs, complex.csv (roughly 110,000 games)\n")
+    f.write(f"Final training accuracy: {train_acc_1:.2f}%, Validation accuracy: {val_acc_1:.2f}%\n")
     f.write("\n")
 
     random.seed(0)
@@ -543,7 +543,7 @@ def neural_network(feature_names, data):
     mlp_2.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
     train_acc_2 = accuracy(data["Y_train"], mlp_2.predict(data["Xmat_train"]))
     val_acc_2 = accuracy(data["Y_val"], mlp_2.predict(data["Xmat_val"]))
-    f.write(f"Final training accuracy: {train_acc_2:.0f}%, Validation accuracy: {val_acc_2:.0f}%\n")
+    f.write(f"Final training accuracy: {train_acc_2:.2f}%, Validation accuracy: {val_acc_2:.2f}%\n")
     f.close()
 
 
@@ -554,11 +554,13 @@ def main(feature_names, data):
 
 if __name__ == "__main__":
     #check file exists
-    data_path = "/home/scratch/24cjb4/df_more_features_" + str(rows_of_data//1000) + "k.csv"
+    #data_path = "/home/scratch/24cjb4/df_more_features_" + str(rows_of_data//1000) + "k.csv"
 
-    if not os.path.isfile(data_path):
-        create_data_complex(rows_of_data, data_path)
+    path_to_complex = "/home/scratch/24cjb4/complex.csv"
 
-    feature_names, data = load_data_complex(data_path)
+    if not os.path.isfile(path_to_complex):
+        create_data_complex(path_to_complex)
+
+    feature_names, data = load_data_complex(path_to_complex)
 
     main(feature_names, data)
