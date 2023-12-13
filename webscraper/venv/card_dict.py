@@ -27,7 +27,7 @@ def create_card_dict():
 
     #write dictionary of statistics to a pkl file
     with open(path, 'wb') as file:
-         pickle.dump(card_dict, file) 
+        pickle.dump(card_dict, file) 
 
 if __name__ == "__main__":
     create_card_dict()
