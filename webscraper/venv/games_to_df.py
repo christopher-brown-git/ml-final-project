@@ -91,7 +91,7 @@ other_features_map = {"Healing": "Tot_Healing", "Hitpoints" : "Tot_Hitpoints", "
                     "Building damage": "Tot_Buildingdamage", "Hitspeed": "Avg_Hitspeed", "Spell radius": "Avg_Spellradius", 
                     "Range": "Avg_Range", "Speed": "Avg_Speed"}
 
-def convert():
+def convert(rows_of_data, data_path):
     if not exists(path):
         game_scraper()
     
@@ -113,7 +113,7 @@ def convert():
     new_rows = []
     out_vec = []
 
-    for (key, info) in games_dict.items():
+    for (key, info) in tqdm.tqdm(games_dict.items(), total=len(games_dict)):
         #until the end the first few columns is me, and the last few columns is opponent
         #decide order at end
         #outcome vector is 1 if the player in the first few columns beat the player in the last few columns
@@ -125,11 +125,11 @@ def convert():
         cards_opp = {}
 
         for (id, level) in info["me"]:
-            card_name = card_dict[id]
+            card_name = card_dict[id][0] #FIX ERRORS LIKE THESE
             cards_me[card_name] = level
         
         for (id, level) in info["opp"]:
-            card_name = card_dict[id]
+            card_name = card_dict[id][0]
             cards_opp[card_name] = level
 
         for r in [new_row_1, new_row_2]:
@@ -160,7 +160,7 @@ def convert():
             for f in other_features_map.values():
                 r[f] = 0
 
-        for (card_name, elixir_cost) in card_dict.values():
+        for (card_id, (card_name, elixir_cost)) in card_dict.items():
             #ignore mirror for now
             if card_name == "Mirror":
                 if card_name in cards_me.keys():
@@ -176,9 +176,9 @@ def convert():
                 continue
             
             #ME/ROW 1
-            level_me = cards_me[card_name]
 
             if card_name in cards_me.keys():
+                level_me = cards_me[card_name]
                 new_row_1[card_name] = 1
                 new_row_1[elixir_cost] += elixir_cost
                 
@@ -269,9 +269,8 @@ def convert():
             
             
             #OPP/ROW 2
-            level_opp = cards_opp[card_name]
-
             if card_name in cards_opp.keys():
+                level_opp = cards_opp[card_name]
                 new_row_2[card_name] = 1
                 new_row_2[elixir_cost] += elixir_cost
                 
@@ -386,12 +385,14 @@ def convert():
             else:
                 #I lost and I come second, so first player won
                 out_vec.append(1)
-                
-        new_rows.append(new_row_1)
-
+              
         #should be plenty of rows
-        if index >= rows_of_data:
-            break
+        # if index >= rows_of_data:
+        #     break
+
+    df_small = pd.DataFrame(new_rows)
+        
+    df_small.to_csv(data_path)
 
 if __name__ == "__main__":
-    convert()
+    convert(100000, "comp.csv")

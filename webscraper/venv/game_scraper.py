@@ -42,9 +42,8 @@ def scrape_for_games(new_file_path):
             cards_opp = info_opp["cards"]
             crowns_opp = info_opp["crowns"]
 
-            res_me = [(card['id'], card['level']) for card in cards_me]
-            res_opp = [(card['id'], card['level']) for card in cards_opp]
-
+            res_me = [(card['name'], card['id'], card['level']) for card in cards_me]
+            res_opp = [(card['name'], card['id'], card['level']) for card in cards_opp]
 
             games[battle_time] = {"me": res_me,
                                     "opp": res_opp, 

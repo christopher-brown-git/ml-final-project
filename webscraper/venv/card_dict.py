@@ -25,6 +25,9 @@ def create_card_dict():
     for item in res["items"]:
         card_dict[item["id"]] = (item["name"], item["elixirCost"])
 
+    #add warmth
+    card_dict[28000021] = ("Warmth", 1)
+    
     #write dictionary of statistics to a pkl file
     with open(path, 'wb') as file:
         pickle.dump(card_dict, file) 
