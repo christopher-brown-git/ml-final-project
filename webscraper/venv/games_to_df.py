@@ -91,16 +91,12 @@ other_features_map = {"Healing": "Tot_Healing", "Hitpoints" : "Tot_Hitpoints", "
                     "Building damage": "Tot_Buildingdamage", "Hitspeed": "Avg_Hitspeed", "Spell radius": "Avg_Spellradius", 
                     "Range": "Avg_Range", "Speed": "Avg_Speed"}
 
-def create_features(stats, card_dict, info, card_name, elixir_cost, row, player):
+def initialize(row, player, info, card_dict):
     cards_in_hand = {}
 
     #card_dict: id -> (name, elixirCost)
     for (id, level) in info[player]:
-        card_name = card_dict[int(id)][0] #FIX ERRORS LIKE THESE
-        cards_in_hand[card_name] = int(level)
-    
-    for (id, level) in info["opp"]:
-        card_name = card_dict[int(id)][0]
+        card_name = card_dict[id][0] #FIX ERRORS LIKE THESE
         cards_in_hand[card_name] = int(level)
 
     row['elixir_cost'] = 0
@@ -125,10 +121,16 @@ def create_features(stats, card_dict, info, card_name, elixir_cost, row, player)
     row['troop_count'] = 0
 
     for f in other_features_map.values():
-        row[f] = 0
-    
-    for f in other_features_map.values():
-        row[f] = 0
+        #if we average it, we need the feature in a list
+        #if we sum it, the feature can remain a value
+        if f[0] == "T":
+            row[f] = 0
+        else:
+            row[f] = []
+
+    return cards_in_hand
+
+def create_features(stats, card_dict, card_name, elixir_cost, row, cards_in_hand):
 
     #ignore mirror for now
     if card_name == "Mirror":
@@ -150,7 +152,6 @@ def create_features(stats, card_dict, info, card_name, elixir_cost, row, player)
         return
     
     #ME/ROW 1
-
 
     if card_name in cards_in_hand.keys():
         level = cards_in_hand[card_name]
@@ -180,13 +181,22 @@ def create_features(stats, card_dict, info, card_name, elixir_cost, row, player)
                 mult = int(stats[card_name]['mult'])
 
                 if isinstance(stats[card_name][feature], list):
-                    index = level - int(stats[card_name]['Level'][0])
-                    print(feature, card_name, level, int(stats[card_name]['Level'][0]), index)
-                    row[actual_feature] += int(stats[card_name][feature][index])*mult
+                    #index into it
+                    index = level - 1
+                    value = int(stats[card_name][feature][index])*mult
+
+                    if isinstance(row[actual_feature], list):
+                        row[actual_feature].append(value)
+                    else:
+                        row[actual_feature] += value
                 else:
-                    if row[actual_feature] == 0:
-                        row[actual_feature] = []
-                    row[actual_feature].append(int(stats[card_name][feature])*mult)
+                    #do not index into it
+                    value = int(stats[card_name][feature])*mult
+
+                    if isinstance(row[actual_feature], list):
+                        row[actual_feature].append(value)
+                    else:
+                        row[actual_feature] += value
 
         #special case for spawners: just add the stats for all the troops the produce over their lifetime
         if card_name in spawners:
@@ -207,12 +217,20 @@ def create_features(stats, card_dict, info, card_name, elixir_cost, row, player)
 
                         if isinstance(stats[card_name][feature], list):
                             #all spawners produce cards that are the same level as they are themselves
-                            index = level - int(stats[card_name]['Level'][0])
-                            row[feature] += int(stats[card_name][feature][index])*mult
+                            index = level - 1
+                            value = int(stats[card_name][feature][index])*mult
+
+                            if isinstance(row[feature], list):
+                                row[feature].append(value)
+                            else:
+                                row[feature] += value
                         else:
-                            if row[feature] == 0:
-                                row[feature] = []
-                            row[feature].append(int(stats[card_name][feature])*mult)
+                            value = int(stats[card_name][feature])*mult
+
+                            if isinstance(row[feature], list):
+                                row[feature].append(value)
+                            else:
+                                row[feature] += value
         
         #last special case
         if card_name == "Goblin Gang":
@@ -223,14 +241,22 @@ def create_features(stats, card_dict, info, card_name, elixir_cost, row, player)
                     mult = int(stats[card_name]['mult'])
 
                     if isinstance(stats[card_name][feature], list):
-                        #all spawners produce cards that are the same level as they are themselves
-                        index = level - int(stats[card_name]['Level'][0])
-                        row[feature] += int(stats[card_name][feature][index])*mult
+                        index = level - 1
+                        value = int(stats[card_name][feature][index])*mult
+
+                        if isinstance(row[feature], list):
+                            row[feature].append(value)
+                        else:
+                            row[feature] += value
                     else:
-                        if row[feature] == 0:
-                            row[feature] = []
-                        row[feature].append(int(stats[card_name][feature])*mult)
-            
+                        value = int(stats[card_name][feature])*mult
+
+                        if isinstance(row[feature], list):
+                            row[feature].append(value)
+                        else:
+                            row[feature] += value
+                        
+                        
             for feature in stats["Spear Goblins"].keys():
                 #do not consider categorical features here
                 if feature in other_features_map.values():
@@ -238,17 +264,25 @@ def create_features(stats, card_dict, info, card_name, elixir_cost, row, player)
 
                     if isinstance(stats[card_name][feature], list):
                         #all spawners produce cards that are the same level as they are themselves
-                        index = level - int(stats[card_name]['Level'][0])
+                        index = level - 1
+                        value = int(stats[card_name][feature][index])*mult
                         
-                        row[feature] += int(stats[card_name][feature][index])*mult
+                        if isinstance(row[feature], list):
+                            row[feature].append(value)
+                        else:
+                            row[feature] += value
+                        
                     else:
-                        if row[feature] == 0:
-                            row[feature] = []
-                        row[feature].append(int(stats[card_name][feature])*mult)
+                        value = int(stats[card_name][feature])*mult
+                        
+                        if isinstance(row[feature], list):
+                            row[feature].append(value)
+                        else:
+                            row[feature] += value
     else:
         row[card_name] = 0
 
-def convert(rows_of_data, data_path):
+def convert(data_path):
     if not exists(path):
         game_scraper()
     
@@ -268,53 +302,86 @@ def convert(rows_of_data, data_path):
         card_dict = pickle.load(file)
     
     new_rows = []
-    out_vec = []
 
+    i = 0
     for (key, info) in tqdm.tqdm(games_dict.items(), total=len(games_dict)):
         #until the end the first few columns is me, and the last few columns is opponent
         #decide order at end
         #outcome vector is 1 if the player in the first few columns beat the player in the last few columns
 
-        new_row_1 = {}
-        new_row_2 = {}
+        new_row_me = {}
+        new_row_opp = {}
 
+        cards_in_my_hand = initialize(new_row_me, "me", info, card_dict)
+        cards_in_opp_hand = initialize(new_row_opp, "opp", info, card_dict)
 
         for (card_id, (card_name, elixir_cost)) in card_dict.items():
-            create_features(stats, card_dict, info, card_name, elixir_cost, new_row_1, "me")
-            create_features(stats, card_dict, info, card_name, elixir_cost, new_row_2, "opp")
+            create_features(stats, card_dict, card_name, elixir_cost, new_row_me, cards_in_my_hand)
+            create_features(stats, card_dict, card_name, elixir_cost, new_row_opp, cards_in_opp_hand)
 
+
+        #average out features that are lists
+
+        for row in [new_row_me, new_row_opp]:
+            for feature in row.keys():
+                if isinstance(row[feature], list):
+                    if len(row[feature]) == 0:
+                        row[feature] = 0
+                    else:
+                        row[feature] = sum(row[feature])//len(row[feature]) #for numerical reasons, should be fine
         
-        me_comes_first = 0
+        me_is_1 = 0
         if np.random.rand() > 0.5:
-            me_comes_first = 1
+            me_is_1 = 1
 
-        #outcome is 1 if first player wins and 0 if they lose
-        if me_comes_first:
-            new_row_1.update(new_row_2)
-            new_rows.append(new_row_1)
+        #randomly assign "me" to be 1 with 50% probability because the "me" in the data is a 
+        #player in a top ranked clan; since these players are better than average, if they are always
+        #given the tag 1 the model may just predict that the player with tag 1 wins, naively
+
+        #the outcome vector is 1 if player 1 wins and 0 if player 1 loses
+        actual_row = {}
+
+        if me_is_1:
+
+            for (key, value) in new_row_me.items():
+                actual_row[key + "_1"] = value
+
+            for (key, value) in new_row_opp.items():
+                actual_row[key + "_2"] = value
+            
             if info["winner"] == 1:
-                #I won and I come first
-                out_vec.append(1)
+                #me won and me is 1
+                actual_row["Y"] = 1
             else:
-                #I lost and I come first
-                out_vec.append(0)
+                #me lost and me is 1
+                actual_row["Y"] = 0
+            
         else:
-            new_row_2.update(new_row_1)
-            new_rows.append(new_row_2)
-            if info["winner"] == 1:
-                #I won and I come second, so first player lost
-                out_vec.append(0)
-            else:
-                #I lost and I come second, so first player won
-                out_vec.append(1)
-              
-        #should be plenty of rows
-        # if index >= rows_of_data:
-        #     break
+            for (key, value) in new_row_opp.items():
+                actual_row[key + "_1"] = value
+            
+            for (key, value) in new_row_me.items():
+                actual_row[key + "_2"] = value
 
-    df_small = pd.DataFrame(new_rows)
+            if info["winner"] == 1:
+                #opp is 1 and opp lost 
+                actual_row["Y"] = 0
+            else:
+                #opp is 1 and opp won
+                actual_row["Y"] = 1
+            
+        new_rows.append(actual_row)
         
-    df_small.to_csv(data_path)
+        i += 1
+
+    df_complex = pd.DataFrame(new_rows)
+        
+    df_complex.to_csv(data_path)
+    #standardize later
 
 if __name__ == "__main__":
-    convert(100000, "comp.csv")
+    datapath = "/home/scratch/24cjb4/complex.csv"
+    if exists(datapath):
+        print(datapath + " already exists!")
+    else:
+        convert(datapath)

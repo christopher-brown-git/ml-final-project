@@ -215,6 +215,30 @@ def create_stats():
     stats["Goblin Drill"]["Spawn Number"] = 1
     stats["Goblin Drill"]["Spawn"] = "Goblins"
 
+    stats["Little Prince"]["Level"].append(15)
+    stats["Little Prince"]["Hitpoints"].append(1022)
+    stats["Little Prince"]["Damage"].append(160)
+
+    stats["Mighty Miner"]["Level"].append(15)
+    stats["Mighty Miner"]["Hitpoints"].append(3285)
+    stats["Mighty Miner"]["Damage"].append(58)
+
+    stats["Skeleton King"]["Level"].append(15)
+    stats["Skeleton King"]["Hitpoints"].append(3358)
+    stats["Skeleton King"]["Damage"].append(299)
+
+    stats["Archer Queen"]["Level"].append(15)
+    stats["Archer Queen"]["Hitpoints"].append(1460)
+    stats["Archer Queen"]["Damage"].append(328)
+
+    stats["Golden Knight"]["Level"].append(15)
+    stats["Golden Knight"]["Hitpoints"].append(2628)
+    stats["Golden Knight"]["Damage"].append(233)
+
+    stats["Monk"]["Level"].append(15)
+    stats["Monk"]["Hitpoints"].append(2920)
+    stats["Monk"]["Damage"].append(204)
+
     f = open("stats.txt", "a")
 
     unique_stats = set()

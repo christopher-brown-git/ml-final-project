@@ -1,0 +1,6 @@
+,elixir_cost,common_count,rare_count,epic_count,legendary_count,champion_count,spell_count,structure_count,spawner_count,melee_short_count,melee_medium_count,melee_long_count,ranged_count,air_count,ground_count,defensive_building_count,siege_building_count,total_card_level_count,troop_count,Tot_Healing,Tot_Hitpoints,Tot_Towerdamage,Tot_Deathdamage,Tot_Damage,Tot_Shield,Tot_Buildingdamage,Avg_Hitspeed,Avg_Spellradius,Avg_Range,Avg_Speed,Witch,Phoenix,Y,Mega Knight,Ice Spirit,Cannon,Fireball,Little Prince
+0,1,0,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0,4,1,0,1157,0,179,239,0,0,0,0,0,[2],1.0,1.0,0,,,,,
+1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,11,1,0,230,0,0,110,0,0,0,0,[2],[4],,,1,1.0,1.0,,,
+2,1,1,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,11,1,0,824,0,0,212,0,0,0,0,[5],0,,1.0,0,,,1.0,,
+3,1,0,0,0,0,1,0,0,0,0,0,0,1,0,1,0,0,4,1,0,931,0,0,146,0,0,0,0,[6],[2],,,1,,,,1.0,1.0
+4,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,12,1,0,0,274,0,913,0,0,0,[2],0,0,,,0,,,,1.0,

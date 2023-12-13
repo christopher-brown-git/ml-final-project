@@ -42,6 +42,7 @@ def scrape_for_games(new_file_path):
             cards_opp = info_opp["cards"]
             crowns_opp = info_opp["crowns"]
 
+            #all cards start at level 1
             res_me = [(card['id'], card['level']) for card in cards_me]
             res_opp = [(card['id'], card['level']) for card in cards_opp]
 
@@ -58,7 +59,7 @@ def scrape_for_games(new_file_path):
                 k += 1
 
 if __name__ == "__main__":
-    new_file = "/home/scratch/24cjb4/games.pkl"
+    new_file = "/home/scratch/24cjb4/games1.pkl"
 
     if not exists(new_file):
         scrape_for_games(new_file)
