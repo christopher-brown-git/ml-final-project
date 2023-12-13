@@ -40,50 +40,12 @@ def create_stats():
     special_names = set()
     special_names.add("Goblin Gang") #only contains link to goblins and spear goblins even tho this is technically innacurate
 
-    #EXTRA CATEGORIES
-    melee_short = {"Skeletons", "Goblins", "Goblin Gang", "Barbarians", "Rascals", "Elixir Golem", "Mini P.E.K.K.A", 
-                        "Goblin Cage", "Barbarian Barrel", "Goblin Barrel", "Skeleton Army", "Giant Skeleton", 
-                        "Bandit", "Graveyard", "Lumberjack"}
-
-    melee_medium = {"Bats", "Knight", "Elite Barbarians", "Valkyrie", "Dark Prince", "Goblin Giant", 
-                        "P.E.K.K.A", "Electro Giant", "Miner", "Royal Ghost", "Fisherman", "Mega Knight", "Golden Knight", 
-                        "Skeleton King", "Monk"}
-
-    melee_long = {"Minions", "Royal Delivery", "Minion Horde", "Royal Recruits", "Mega Minion", "Battle Healer", "Guards", 
-                        "Prince", "Phoenix", "Night Witch", "Mighty Miner"}
-
-    #ranged units have range tag already
-
-    air = {"Bats", "Minions", "Skeleton Barrel", "Skeleton Dragons", "Minion Horde", "Mega Minion", "Flying Machine", 
-                "Baby Dragon", "Balloon", "Electro Dragon", "Inferno Dragon", "Phoenix", "Lava Hound"}
-
-    ground = {"Skeletons", "Electro Spirit", "Fire Spirit", "Ice Spirit", "Goblins", "Spear Goblins",
-                "Bomber", "Archers", "Knight", "Goblin Gang", "Firecracker", "Royal Delivery", "Barbarians", "Rascals", "Royal Giant",
-                "Elite Barbarians", "Royal Recruits", "Heal Spirit", "Ice Golem", "Dart Goblin", "Elixir Golem", "Mini P.E.K.K.A", "Musketeer",
-                "Goblin Cage", "Valkyrie", "Battle Ram", "Hog Rider", "Battle Healer", "Zappies", "Giant", "Wizard", "Royal Hogs",
-                "Three Musketeers", "Barbarian Barrel", "Wall Breakers", "Goblin Barrel", "Guards", "Skeleton Army", "Dark Prince",
-                "Hunter", "Witch", "Prince", "Bowler", "Executioner", "Cannon Cart", "Giant Skeleton", "Goblin Giant",
-                "P.E.K.K.A", "Electro Giant", "Golem", "Miner", "Princess", "Ice Wizard", "Royal Ghost", "Bandit", "Fisherman",
-                "Electro Wizard", "Magic Archer", "Lumberjack", "Night Witch", "Mother Witch", "Ram Rider", "Sparky",
-                "Mega Knight", "Little Prince", "Golden Knight", "Skeleton King", "Mighty Miner", "Archer Queen", "Monk"}
-
-    defensive_buildings = {"Cannon", "Tesla", "Bomb Tower", "Inferno Tower"}
-
-    siege_buildings = {"Mortar", "X-Bow"}  
-
     #speed 0 is for spells and buildings
     speed_to_num = {}
     speed_to_num["Slow"] = 1
     speed_to_num["Medium"] = 2
     speed_to_num["Fast"] = 3
     speed_to_num["Very fast"] = 4
-
-    melee_range_to_num = {}
-
-    melee_range_to_num["Not Melee"] = 0
-    melee_range_to_num["Short"] = 1
-    melee_range_to_num["Medium"] = 2
-    melee_range_to_num["Long"] = 3
 
     for name, link in tqdm.tqdm(names_to_link.items(), total=len(names_to_link)):
         URL = link
@@ -105,34 +67,6 @@ def create_stats():
         container_1 = soup.find("section", class_="mb-10")
         container_2 = container_1.find("div", class_="grid md:grid-cols-2 gap-5")
         
-        if name in melee_short:
-            stats[name]["Melee Range"] = melee_range_to_num["Short"]
-        elif name in melee_medium:
-            stats[name]["Melee Range"] = melee_range_to_num["Medium"]
-        elif name in melee_long:
-            stats[name]["Melee Range"] = melee_range_to_num["Long"]
-        else:
-            stats[name]["Melee Range"] = melee_range_to_num["Not Melee"]
-
-        if name in air:
-            stats[name]["Air"] = 1
-        else:
-            stats[name]["Air"] = 0
-
-        if name in ground:
-            stats[name]["Ground"] = 1
-        else:
-            stats[name]["Ground"] = 0
-
-        if name in defensive_buildings:
-            stats[name]["Defensive Building"] = 1
-        else:
-            stats[name]["Defensive Building"] = 0
-        
-        if name in siege_buildings:
-            stats[name]["Siege Building"] = 1
-        else:
-            stats[name]["Siege Building"] = 0
 
 
         #special case for goblin gang, just hard code
