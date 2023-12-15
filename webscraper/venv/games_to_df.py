@@ -134,20 +134,20 @@ def create_features(stats, card_dict, card_name, elixir_cost, row, cards_in_hand
 
     #ignore mirror for now
     if card_name == "Mirror":
-        if card_name in cards_in_hand.keys():
-            row[card_name] = 1
-        else:
-            row[card_name] = 0
+        # if card_name in cards_in_hand.keys():
+        #     row[card_name] = 1
+        # else:
+        #     row[card_name] = 0
 
         return
 
     #ignore warmth except for elixir count
     if card_name == "Warmth":
-        if card_name in cards_in_hand.keys():
-            row[card_name] = 1
-            row['elixir_cost'] += elixir_cost
-        else:
-            row[card_name] = 0
+        # if card_name in cards_in_hand.keys():
+        #     row[card_name] = 1
+        #     row['elixir_cost'] += elixir_cost
+        # else:
+        #     row[card_name] = 0
           
         return
     
@@ -155,7 +155,7 @@ def create_features(stats, card_dict, card_name, elixir_cost, row, cards_in_hand
 
     if card_name in cards_in_hand.keys():
         level = cards_in_hand[card_name]
-        row[card_name] = 1
+        # row[card_name] = 1
         row['elixir_cost'] += elixir_cost
         
         #handle counts
@@ -279,8 +279,8 @@ def create_features(stats, card_dict, card_name, elixir_cost, row, cards_in_hand
                             row[feature].append(value)
                         else:
                             row[feature] += value
-    else:
-        row[card_name] = 0
+    # else:
+        # row[card_name] = 0
 
 def convert(data_path):
     if not exists(path):
@@ -380,7 +380,7 @@ def convert(data_path):
     #standardize later
 
 if __name__ == "__main__":
-    datapath = "/home/scratch/24cjb4/complex.csv"
+    datapath = "/home/scratch/24cjb4/complex_no_cards.csv"
     if exists(datapath):
         print(datapath + " already exists!")
     else:
