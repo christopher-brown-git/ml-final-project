@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-path = "100krows.a"
+path = "step1.txt"
 #return 0 for error and 1 otherwise
 def visualize():
     if not os.path.isfile(path):

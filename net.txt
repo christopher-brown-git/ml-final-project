@@ -21,6 +21,7 @@ Final training accuracy: 50%, Validation accuracy: 49%
 [4, 5, 2, 7, 3, 2, 1] Complex features, 50 epochs, 10k rows of data learning_rate=.05
 Final training accuracy: 50%, Validation accuracy: 50%
 Final training accuracy: 50%, Validation accuracy: 50%
+
 [4, 5, 2, 7, 3, 2, 1] Complex features, 50 epochs, 100k rows of data learning_rate=.05
 Final training accuracy: 50%, Validation accuracy: 51%
 
@@ -51,11 +52,9 @@ Final training accuracy: 49.64%, Validation accuracy: 49.77% 300s/it with dropou
 Final training accuracy: 50.36%, Validation accuracy: 50.23% dropout_prob 0.0
 Final training accuracy: 49.64%, Validation accuracy: 49.77% dropout_prob 0.5
 
-
 [8, 4, 1] Complex features, 50 epochs, complex.csv (roughly 110,000 games) learning rate = 0.05
 Final training accuracy: 50.36%, Validation accuracy: 50.23% dropout_prob 0.0
 Final training accuracy: 50.36%, Validation accuracy: 50.23% dropout_prob 0.5
-
 
 [8, 4, 1] Complex features, 50 epochs, complex.csv (roughly 110,000 games) learning rate = 0.01
 Final training accuracy: 49.64%, Validation accuracy: 49.77% dropout_prob 0.0

@@ -1,0 +1,15 @@
+[8, 4, 1] Complex features, 50 epochs, complex.csv (roughly 110,000 games) learning rate = 0.05
+Final training accuracy: 50.36%, Validation accuracy: 50.23% dropout_prob 0.0
+Final training accuracy: 50.36%, Validation accuracy: 50.23% dropout_prob 0.5
+
+[20, 10, 1] Complex features, 50 epochs, complex.csv (roughly 110,000 games) learning_rate=.05
+Final training accuracy: 50.36%, Validation accuracy: 50.23% 52.29 s/it with dropout 0
+Final training accuracy: 50.36%, Validation accuracy: 50.23% 52.48 s/it with dropout = .5
+
+[40, 20, 1] Complex features, 50 epochs, complex.csv (roughly 110,000 games) learning_rate=.05
+Final training accuracy: 50.36%, Validation accuracy: 50.23%
+Final training accuracy: 50.36%, Validation accuracy: 50.23%
+
+[100, 50, 1] Complex features, 50 epochs, complex.csv (roughly 110,000 games) learning_rate=.05
+Final training accuracy: 49.64%, Validation accuracy: 49.77% 300s/it with dropout 0
+Final training accuracy: 49.64%, Validation accuracy: 49.77% 300s/it with dropout = .5

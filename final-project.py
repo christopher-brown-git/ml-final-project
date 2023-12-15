@@ -526,7 +526,7 @@ def neural_network(feature_names, data):
 
     #neural net with no dropout
     random.seed(42)
-    arc = [8, 4, 1]
+    arc = [4, 5, 2, 7, 3, 2, 1]
     l_rate = .05
     mlp_1 = MLP(n_features=d, layer_sizes=arc, learning_rate=.05, dropout_proba=0.0)
     mlp_1.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
@@ -545,16 +545,16 @@ def neural_network(feature_names, data):
     f.write(f"Final testing accuracy: {test_acc_1:.2f}% dropout_prob " + str(0.0) + "\n")
     f.write("\n")
 
-    # random.seed(0)
-    # print("Training neural net with dropout=0.5")
-    # mlp_2 = MLP(n_features=d, layer_sizes=arc, learning_rate=0.1, dropout_proba=0.5)
-    # mlp_2.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
-    # preds_2 = mlp_2.predict(data["Xmat_train"])
-    # train_acc_2 = accuracy(data["Y_train"], preds_2)
-    # np.savetxt('output1.txt', preds_2, delimiter=',')
+    random.seed(0)
+    print("Training neural net with dropout=0.5")
+    mlp_2 = MLP(n_features=d, layer_sizes=arc, learning_rate=0.1, dropout_proba=0.5)
+    mlp_2.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
+    preds_2 = mlp_2.predict(data["Xmat_train"])
+    train_acc_2 = accuracy(data["Y_train"], preds_2)
+    np.savetxt('output1.txt', preds_2, delimiter=',')
 
-    # val_acc_2 = accuracy(data["Y_val"], mlp_2.predict(data["Xmat_val"]))
-    # f.write(f"Final training accuracy: {train_acc_2:.2f}%, Validation accuracy: {val_acc_2:.2f}% dropout_prob " + str(0.5) + "\n")
+    val_acc_2 = accuracy(data["Y_val"], mlp_2.predict(data["Xmat_val"]))
+    f.write(f"Final training accuracy: {train_acc_2:.2f}%, Validation accuracy: {val_acc_2:.2f}% dropout_prob " + str(0.5) + "\n")
     f.close()
 
 
