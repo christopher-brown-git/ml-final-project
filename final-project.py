@@ -530,30 +530,31 @@ def neural_network(feature_names, data):
     l_rate = .05
     mlp_1 = MLP(n_features=d, layer_sizes=arc, learning_rate=.05, dropout_proba=0.0)
     mlp_1.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
-    preds_1 = mlp_1.predict(data["Xmat_test"])
-    #train_acc_1 = accuracy(data["Y_train"], preds_1)
-    #val_acc_1 = accuracy(data["Y_val"], mlp_1.predict(data["Xmat_val"]))
 
-    test_acc_1 = accuracy(data["Y_test"], preds_1)
+    preds_1 = mlp_1.predict(data["Xmat_train"])
+    train_acc_1 = accuracy(data["Y_train"], preds_1)
+    val_acc_1 = accuracy(data["Y_val"], mlp_1.predict(data["Xmat_val"]))
+
+    test_acc_1 = accuracy(data["Y_test"], mlp_1.predict(data["Xmat_test"]))
     np.savetxt('output1.txt', preds_1, delimiter=',')
 
     f = open("net.txt", "a")
     f.write("\n")
     f.write(str(arc) + f" Complex features, 50 epochs, complex.csv (roughly 110,000 games) " + "learning rate = " + str(l_rate) + "\n")
+    f.write(f"Final training accuracy: {train_acc_1:.2f}%, Validation accuracy: {val_acc_1:.2f}% dropout_prob " + str(0.0) + "\n")
     f.write(f"Final testing accuracy: {test_acc_1:.2f}% dropout_prob " + str(0.0) + "\n")
-    #f.write(f"Final training accuracy: {train_acc_1:.2f}%, Validation accuracy: {val_acc_1:.2f}% dropout_prob " + str(0.0) + "\n")
     f.write("\n")
 
-    random.seed(0)
-    print("Training neural net with dropout=0.5")
-    mlp_2 = MLP(n_features=d, layer_sizes=arc, learning_rate=0.1, dropout_proba=0.5)
-    mlp_2.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
-    preds_2 = mlp_2.predict(data["Xmat_train"])
-    train_acc_2 = accuracy(data["Y_train"], preds_2)
-    np.savetxt('output1.txt', preds_2, delimiter=',')
+    # random.seed(0)
+    # print("Training neural net with dropout=0.5")
+    # mlp_2 = MLP(n_features=d, layer_sizes=arc, learning_rate=0.1, dropout_proba=0.5)
+    # mlp_2.fit(data["Xmat_train"], data["Y_train"], data["Xmat_val"], data["Y_val"], verbose=False, max_epochs=50)
+    # preds_2 = mlp_2.predict(data["Xmat_train"])
+    # train_acc_2 = accuracy(data["Y_train"], preds_2)
+    # np.savetxt('output1.txt', preds_2, delimiter=',')
 
-    val_acc_2 = accuracy(data["Y_val"], mlp_2.predict(data["Xmat_val"]))
-    f.write(f"Final training accuracy: {train_acc_2:.2f}%, Validation accuracy: {val_acc_2:.2f}% dropout_prob " + str(0.5) + "\n")
+    # val_acc_2 = accuracy(data["Y_val"], mlp_2.predict(data["Xmat_val"]))
+    # f.write(f"Final training accuracy: {train_acc_2:.2f}%, Validation accuracy: {val_acc_2:.2f}% dropout_prob " + str(0.5) + "\n")
     f.close()
 
 

@@ -9,7 +9,6 @@ import sys
 from os.path import exists
 from sklearn.model_selection import train_test_split
 sys.path.insert(1, 'webscraper/venv/')
-import games_to_df
 
 #creats a new dataframe with the only features being the cards used in each deck
 def create_data_simple(rows_of_data, data_path):

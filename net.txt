@@ -65,3 +65,10 @@ Final training accuracy: 49.64%, Validation accuracy: 49.77% dropout_prob 0.5
 Final testing accuracy: 50.20% dropout_prob 0.0
 
 BEGIN ABLATION STUDY --> GET RID OF ALL CARD FEATURES --> NO CATEGORICAL VARIABLES, ONLY CONTINUOUS ONES
+
+
+
+[8, 4, 1] Complex features, 50 epochs, complex.csv (roughly 110,000 games) learning rate = 0.05
+Final training accuracy: 50.41%, Validation accuracy: 49.76% dropout_prob 0.0
+Final testing accuracy: 49.52% dropout_prob 0.0
+
